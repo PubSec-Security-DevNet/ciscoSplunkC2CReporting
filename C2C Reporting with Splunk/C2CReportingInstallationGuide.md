@@ -39,7 +39,7 @@ By integrating monitoring and reporting, organizations can ensure that trust is 
     - [Configure ISE Syslog](#configure-ise-syslog)
     - [Configure ISE Repositories](#configure-ise-repositories)
     - [ISE Analytics CLI Account and Host Key Configuration](#ise-analytics-cli-account-and-host-key-configuration)
-- [Cisco Catalyst Center Configuration](#cisco-catalyst-center-configuration)
+- [Cisco Catalyst Center Configuration - Optional](#cisco-catalyst-center-configuration---optional)
     - [Create Catalyst Center Reports](#create-catalyst-center-reports)
     - [Create API User](#create-api-user)
     - [Create Scheduled Reports](#create-scheduled-reports)
@@ -85,7 +85,7 @@ By integrating monitoring and reporting, organizations can ensure that trust is 
 - [Required for endpoints over 10,000 Endpoints](#required-for-endpoints-over-10000-endpoints)
     - [Preferred Method - Using "sort 0"](#preferred-method---using-sort-0)
     - [Alternate Method - Editing limits.conf](#alternate-method---editing-limitsconf)
-- [Optional: Change Navigation to only show Comply to Connect (C2C) Views](#optional-change-navigation-to-only-show-comply-to-connect-c2c-views)
+- [Change Navigation to only show Comply to Connect (C2C) Views - Optional](#change-navigation-to-only-show-comply-to-connect-c2c-views---optional)
     - [Create the local UI Navigation folder structure.](#create-the-local-ui-navigation-folder-structure)
     - [Copy the current default.xml from default to local](#copy-the-current-defaultxml-from-default-to-local)
     - [Edit the local copy of the default.xml](#edit-the-local-copy-of-the-defaultxml)
@@ -114,7 +114,7 @@ By integrating monitoring and reporting, organizations can ensure that trust is 
 This document assumes that following is already scoped/sized and installed in the environment.  
 * Required
   * Cisco Identity Services Engine (ISE)
-    * w/ Analytics License
+    * w/ Analytics Token Applied/Enabled
   * Splunk Enterprise
 * Optional 
   * Cisco Catalyst Center
@@ -237,17 +237,17 @@ Note: The password will be required to be changed on the first login so don't us
 After the user account is created we will need to log in using SSH with that user account to complete the SFTP Host Key configuration.  
 As the new admin user execute the following to save and validate the host key addition:  
 
-```crypto host_key add host \<IP\\Hostname\>```  
+```crypto host_key add host <IP\Hostname>```  
 
 You should see "host key fingerprint added" or run:
 
 ```show crypto host_keys```
 OR
-```show repository \<SFTPrepoName\>``` to validate that you can successfully connect to the repository.
+```show repository <SFTPrepoName>``` to validate that you can successfully connect to the repository.
 
 ---
 
-# Cisco Catalyst Center Configuration
+# Cisco Catalyst Center Configuration - Optional
 ### Create Catalyst Center Reports
 The C2C Reporting App pulls the result of native Catalyst Center reports to present dashboards for network device compliance. The following screenshots show the required reports. The TA will require an API account with permissions to pull the reports and the report names will also be required.  
 
@@ -277,14 +277,14 @@ Finish the Report wizard with the following inputs:
     * Network Profile \*
     * Network Settings \*
     * EoX \*
-* **Schedule:** At least once a week
+* **Schedule:** At least once a week  
 All other configuration should be left at the default.
 
 #### Inventory Report
 Navigate to **Reports > Report Templates > Inventory** and click **"Generate"** for the **"All Data"** report  
 Finish the Report wizard with the following inputs:
 * **Report Name:** Simple Name (This will be input into the Add-on)
-* **Scope:** (Default is all devices, ingest size can be reduced with optional filter of Location if reporting scope is smaller than Global)
+* **Scope:** Global (ingest size can be reduced with optional filter of Location if reporting scope is smaller than Global)
 * **Report Type:** CSV
 * **Fields:** (Default is all fields below, \* denotes minimum required fields)
     * Device Family
@@ -303,7 +303,7 @@ Finish the Report wizard with the following inputs:
     * DNA License
     * Network License \*
     * Fabric Role
-* **Schedule:** At least once a week
+* **Schedule:** At least once a week  
 All other configuration should be left at the default.
 
 Take note of the Report Names as they will be entered into the Add-on later in this guide
@@ -312,23 +312,23 @@ Take note of the Report Names as they will be entered into the Add-on later in t
 
 # Splunk Reporting Application Configuration 
 ### Create Indexes on Splunk
-In Splunk we will need to configure indexes for the data collection. Avoid using the **"Main**" index. Individual indexes provide separate retention, access, and meaningful naming in the case that data needs to be purged from the system.  
+In Splunk configure indexes for the data collection. Avoid using the **"Main**" index. Individual indexes provide separate retention, access, and meaningful naming in the case that data needs to be purged from the system.  
 For the reporting app there will be:
 * Syslog data from ISE
 * Analytics Report data from ISE
-* Network Compliance data from Catalyst Center
-* Hardware and Vulnerability data from Tenable
+* Network Compliance data from Catalyst Center - Optional
+* Hardware and Vulnerability data from Tenable - Optional
 
-In this example we will use separate indexes for each source.  
+In this example separate indexes will be used for each source.  
 * ise_syslog
 * ise_analytics
-* catalyst_center
-* tenable
+* catalyst_center (optional)
+* tenable (optional)
 
-To configure the indexes go to your Splunk instance and select **Settings > Indexes**  
+To configure the indexes, go to the Splunk Indexer instance and select **Settings > Indexes**  
 ![Splunk Index Settings](static/img/settingsIndex.png)  
 
-Click **"New Index**" and give it a name and **"Max size**" values (Size is dependent on your environment)  
+Click **"New Index**" and give it a name and **"Max size**" values (Size is dependent the environment)  
 ![New Index Configuration](static/img/newIndex.png)  
 
 ---
@@ -341,7 +341,7 @@ On the Splunk UI navigate to the **Cisco Catalyst Add-on for Splunk** and click 
 
 #### Analytics Account Configuration
 Once in the ISE Application click on the **"Configuration**" tab and click **"Add"**  
-In the pop up change the **"Account Type"** to Analytics Reports and input the requested parameters.
+In the pop up, change the **"Account Type"** to Analytics Reports and input the requested parameters.
 * **Account Type:** Analytics Reports
 * **Account Name:** Simple Name for Account Settings
 * **IP Address / Hostname:** \<IPAddress/Hostname\>
@@ -382,7 +382,7 @@ On the Splunk UI navigate to the Cisco Catalyst Add-on for Splunk and click on *
 ![Catalyst Center Application](static/img/catalystCenterApp.png)
 
 Navigate to the **"Configuration"** tab and click **"Add"**  
-In the pop up input the API credentials for Catalyst Center
+In the pop up, input the API credentials for Catalyst Center
 * **Account Name:** Simple Name for Account Settings
 * **Cisco Catalyst Center Host:** \<IPAddress/Hostname with leading https:\\\\\>
 * **Username:** \<API User Account\>   
@@ -405,7 +405,8 @@ Navigate to the **"Inputs"** tab and select the **"Input Type"** dropdown and se
 
 ### Tenable Add-On
 On the Splunk UI navigate to the Tenable Add-on for Splunk.
-Configure the Add-On for Tenable Security Center using the public Tenable Documentation.
+Configure the Add-On for Tenable Security Center using the public Tenable Documentation.  
+[https://docs.tenable.com/integrations/Splunk/Content/Splunk2/Installation.htm](https://docs.tenable.com/integrations/Splunk/Content/Splunk2/Installation.htm)
 
 ---
 
@@ -449,19 +450,19 @@ In the Cisco Catalyst App, the macros generally fall into three functional types
     *   **Used In**: Generally used in all searches or dashboards to narrow down the dataset to relevant data indexes.
     *   **How to Modify**: By default, it searches all indexes (`*`). **For better performance and security, change this to specific indexes.**
         *   *Example*: Definition = index IN ("ise_syslog","ise_analytics","catalyst_center","tenable")
-        ![Splunk Reporting App Index Macro](static/img/splunkAppIndex.png)  
+    ![Splunk Reporting App Index Macro](static/img/splunkAppIndex.png)  
 *   **`cisco_catalyst_app_sourcetypes` Optional**
     *   **Purpose**: Filters searches to only include specific sourcetypes related to the Cisco ecosystem and Tenable.
     *   **Used In**: Generally used in all searches or dashboards to narrow down the dataset to relevant sourcetypes.
     *   **How to Modify**: If using a custom sourcetype for data inputs (e.g., `cisco:ise:custom`), add it to the list.
         *   *Example*: Definition = sourcetype IN ("cisco:ise*", "cisco:sdwan*", "cisco:dnac*", "stream:netflow", "cisco:cybervision:*","meraki:*", "cisco:ios", "cisco:thousandeyes:test", "cisco:sgacl:logs","cisco:catalyst:center:*", "cisco:ise:analytics*", "tenable:sc*")
-        ![Splunk Reporting App Sourcetype Macro](static/img/splunkSourcetype.png)  
+    ![Splunk Reporting App Sourcetype Macro](static/img/splunkSourcetype.png)  
 *   **`summariesonly` Optional**
     *   **Purpose**: Controls whether searches pull data from Data Model acceleration summaries or raw data.
     *   **Used In**: Almost every search starting with `| tstats`.
     *   **How to Modify**: Set to `true` to significantly speed up dashboards if Data Model acceleration is turned on.
         *   *Example*: `Definition = summariesonly=true`
-        ![Splunk Reporting App Summaries Macro](static/img/splunkSummaries.png)
+    ![Splunk Reporting App Summaries Macro](static/img/splunkSummaries.png)
 
 ---
 
@@ -491,7 +492,7 @@ These macros use Regular Expressions to parse the results of security checks fro
     * `cisco_catalyst_010_reporting_uscybercom_device_category_step_1`.
 *   **How to Modify**: Add or remove categories to match the organization's specific device classification standards. Ensure that no spaces are on the leading or trailing of each Logical Profile in the definition.
     *   *Example*: Definition = "(Workstations|Servers|Printers|Medical Devices)"
-    ![CYBERCOM Logical Profile Macro](static/img/cybercomMacro.png)
+![CYBERCOM Logical Profile Macro](static/img/cybercomMacro.png)
 
 #### cisco_catalyst_CYBERCOM_Unknown
 *   **Purpose**: The fallback label for devices that haven't been profiled.
@@ -512,7 +513,7 @@ These macros provide the "Header" information for compliance reports.
 *   **Used In**: `cisco_catalyst_report_all_step_2`.
 *   **How to Modify**: These **must** be changed for every installation.
     *   *Example*: Change `Example Owner` to `Department of Transportation`.
-    *   *Example*: Change `B9EJMA12345` to the actual site deployment ID.
+    *   *Example*: Change `B9EJMA12345` to the actual site deployment ID (Commonly Primary Admin Node ISE Serial Number).
 
 ---
 
@@ -599,7 +600,7 @@ This view is the output of the [master report](#master-aggregator-report) that r
 ## Detailed Reports Menu
 ### Step 1 - Device Classification
 This report provides views of the C2C 0.1.0 (Device Categorization) & 0.1.1(Operating System Summary) requirements.  
-![Step 1 Device Classification](step1View.png)
+![Step 1 Device Classification](static/img/step1View.png)
 
 ### Step 2 - Manageability and Compliance
 This report provides views of the C2C 0.2.0-0.2.24 requirements. This includes Discovery, Manageability, MAB vs 802.1X, Compliance, and other elements.  
@@ -645,7 +646,7 @@ maxresultrows = X0000
 ```
 ---
 
-# Optional: Change Navigation to only show Comply to Connect (C2C) Views  
+# Change Navigation to only show Comply to Connect (C2C) Views - Optional  
 
 ### Create the local UI Navigation folder structure.
 `mkdir -p /opt/splunk/etc/apps/cisco-catalyst-app/local/data/ui/nav/`  
