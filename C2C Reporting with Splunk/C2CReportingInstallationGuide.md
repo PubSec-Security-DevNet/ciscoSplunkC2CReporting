@@ -83,7 +83,8 @@ By integrating monitoring and reporting, organizations can ensure that trust is 
     - [Step 4 - ICAM Summary](#step-4---icam-summary)
     - [Implementation Metrics](#implementation-metrics)
 - [Required for endpoints over 10,000 Endpoints](#required-for-endpoints-over-10000-endpoints)
-    - [Preferred Method](#preferred-method)
+    - [Preferred Method - Using "sort 0"](#preferred-method---using-sort-0)
+    - [Alternate Method - Editing limits.conf](#alternate-method---editing-limitsconf)
 - [Optional: Change Navigation to only show Comply to Connect (C2C) Views](#optional-change-navigation-to-only-show-comply-to-connect-c2c-views)
     - [Create the local UI Navigation folder structure.](#create-the-local-ui-navigation-folder-structure)
     - [Copy the current default.xml from default to local](#copy-the-current-defaultxml-from-default-to-local)
@@ -621,7 +622,7 @@ This view provides KPI metrics based on the C2C program office Goals and Calcula
 # Required for endpoints over 10,000 Endpoints
 In the event that the evironment for Analytics reporting exceeds 10,000 endpoints this will encounter a default limit on Splunk which limits Search results to 10,000 records. For this case there are two options to report on endpoints exceeding the default:
 
-### Preferred Method
+### Preferred Method - Using "sort 0"
 Adding a "sort 0" to the time sorting on the Master Search named `cisco_catalyst_reports_lookup` can override the default limits.  
 * Navigate to *Settings > Searches, reports, and alerts*  
 * Select App: *Cisco Enterprise Networking for Splunk Platform(cisco-catalyst-app)*
@@ -635,6 +636,13 @@ Adding a "sort 0" to the time sorting on the Master Search named `cisco_catalyst
 | outputlookup cisco_catalyst_analytics_reports.csv create_empty=f  
 ```
 
+### Alternate Method - Editing limits.conf
+To increase the Splunk search row limit over the default of 10,000, you must update the maxresultrows setting in limits.conf. Create or edit limits.conf in `$SPLUNK_HOME/etc/system/local/` and set maxresultrows to the desired limit under the [searchresults] stanza. Restart Splunk after making this change. 
+
+```
+[searchresults]
+maxresultrows = X0000
+```
 ---
 
 # Optional: Change Navigation to only show Comply to Connect (C2C) Views  
