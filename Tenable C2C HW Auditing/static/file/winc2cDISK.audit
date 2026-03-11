@@ -1,0 +1,11 @@
+<check_type:"Windows" version:"2">
+<custom_item>
+    type: AUDIT_POWERSHELL
+    description: "C2C WMI Powershell Disk Information"
+    value_type: POLICY_TEXT
+    powershell_args: "Get-WmiObject -Class Win32_LogicalDisk | ? {$_. DriveType -eq 3} | select DeviceID, {[int]($_.Size /1GB)}, {[int]($_.FreeSpace /1GB)} | Format-List -Property *"
+    value_data:""
+    only_show_cmd_output: YES
+    check_type: CHECK_REGEX
+</custom_item>
+</check_type>

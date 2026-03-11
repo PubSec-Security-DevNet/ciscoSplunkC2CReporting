@@ -1,0 +1,11 @@
+<check_type:"Windows" version:"2">
+<custom_item>
+    type: AUDIT_POWERSHELL
+    description: "C2C WMI Powershell Processor Information"
+    value_type: POLICY_TEXT
+    powershell_args: "Get-WmiObject Win32_Processor | Format-List -Property Manufacturer, Name, NumberOfCores, NumberOfLogicalProcessors, SocketDesignation"
+    value_data:""
+    only_show_cmd_output: YES
+    check_type: CHECK_REGEX
+</custom_item>
+</check_type>

@@ -1,0 +1,11 @@
+<check_type:"Windows" version:"2">
+<custom_item>
+    type: AUDIT_POWERSHELL
+    description: "C2C WMI Powershell OS Information"
+    value_type: POLICY_TEXT
+    powershell_args: "Get-WmiObject Win32_OperatingSystem | Format-List -Property BuildNumber, Caption, CodeSet, OSArchitecture, Version"
+    value_data:""
+    only_show_cmd_output: YES
+    check_type: CHECK_REGEX
+</custom_item>
+</check_type>

@@ -1,0 +1,11 @@
+<check_type:"Windows" version:"2">
+<custom_item>
+    type: AUDIT_POWERSHELL
+    description: "C2C WMI Powershell Computer Product Information"
+    value_type: POLICY_TEXT
+    powershell_args: "Get-WmiObject Win32_ComputerSystemProduct | Format-List -Property PSComputerName, UUID, Name, Vendor, Version, IdentifyingNumber"
+    value_data:""
+    only_show_cmd_output: YES
+    check_type: CHECK_REGEX
+</custom_item>
+</check_type>

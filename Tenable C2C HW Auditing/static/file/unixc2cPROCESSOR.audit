@@ -1,0 +1,37 @@
+##
+# This audit serves as an example that could assist in custom audit creation.
+#
+# Requires modification of the sudoers file to allow commands to run without password input
+# Ubuntu:
+#   USERNAME ALL=NOPASSWD:{COMMAND},/usr/sbin/dmidecode, /usr/sbin/lshw
+# RHEL
+#   USERNAME ALL=(ALL) NOPASSWD: /usr/sbin/dmidecode, /usr/bin/lshw
+#
+
+<check_type:"Unix">
+
+<if>
+    <condition type:"OR">
+        <custom_item>
+            system      : "Linux"
+            type        : CMD_EXEC
+            description : "System Info"
+            cmd         : "sudo dmidecode -t 4"
+            expect      : "(.*)$"
+		</custom_item>
+    </condition>
+    <then>
+        <report type:"PASSED">
+            description : "C2C Processor Information Gathered Successfully"
+            show_output : YES
+        </report>
+    </then>
+    <else>
+        <report type:"FAILED">
+            description : "C2C Processor Information Incomplete or Missing"
+            show_output : YES
+        </report>
+    </else>
+</if>
+
+</check_type>
