@@ -4,4 +4,4 @@
 
 [Submit to CMRS Supplement Install Guide](<CMRS Reporting Supplement/submit2CmrsInstallationGuide.md>)
 
-[Tenable Audit Files Install Guide](<CMRS Reporting Supplement/TenableAuditFileInstallationGuide.md>)
+[Tenable Audit Files Install Guide](<Tenable C2C HW Auditing/TenableAuditFileInstallationGuide.md>)
