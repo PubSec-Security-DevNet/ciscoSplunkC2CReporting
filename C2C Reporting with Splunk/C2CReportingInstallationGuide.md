@@ -83,8 +83,8 @@ By integrating monitoring and reporting, organizations can ensure that trust is 
     - [Step 4 - ICAM Summary](#step-4---icam-summary)
     - [Implementation Metrics](#implementation-metrics)
 - [Required for endpoints over 10,000 Endpoints](#required-for-endpoints-over-10000-endpoints)
-    - [Preferred Method - Using "sort 0"](#preferred-method---using-sort-0)
-    - [Alternate Method - Editing limits.conf](#alternate-method---editing-limitsconf)
+    - [Modify cisco\_catalyst\_reports\_lookup Using "sort 0"](#modify-cisco_catalyst_reports_lookup-using-sort-0)
+    - [Editing App Specific limits.conf for subsearches](#editing-app-specific-limitsconf-for-subsearches)
 - [Change Navigation to only show Comply to Connect (C2C) Views - Optional](#change-navigation-to-only-show-comply-to-connect-c2c-views---optional)
     - [Create the local UI Navigation folder structure.](#create-the-local-ui-navigation-folder-structure)
     - [Copy the current default.xml from default to local](#copy-the-current-defaultxml-from-default-to-local)
@@ -621,9 +621,9 @@ This view provides KPI metrics based on the C2C program office Goals and Calcula
 ---
 
 # Required for endpoints over 10,000 Endpoints
-In the event that the evironment for Analytics reporting exceeds 10,000 endpoints this will encounter a default limit on Splunk which limits Search results to 10,000 records. For this case there are two options to report on endpoints exceeding the default:
+In the event that the evironment for Analytics reporting exceeds 10,000 endpoints this will encounter a default limit on Splunk which limits Search results to 10,000 records.  
 
-### Preferred Method - Using "sort 0"
+### Modify cisco_catalyst_reports_lookup Using "sort 0"
 Adding a "sort 0" to the time sorting on the Master Search named `cisco_catalyst_reports_lookup` can override the default limits.  
 * Navigate to *Settings > Searches, reports, and alerts*  
 * Select App: *Cisco Enterprise Networking for Splunk Platform(cisco-catalyst-app)*
@@ -637,13 +637,36 @@ Adding a "sort 0" to the time sorting on the Master Search named `cisco_catalyst
 | outputlookup cisco_catalyst_analytics_reports.csv create_empty=f  
 ```
 
-### Alternate Method - Editing limits.conf
-To increase the Splunk search row limit over the default of 10,000, you must update the maxresultrows setting in limits.conf. Create or edit limits.conf in `$SPLUNK_HOME/etc/system/local/` and set maxresultrows to the desired limit under the [searchresults] stanza. Restart Splunk after making this change. 
+### Editing App Specific limits.conf for subsearches
+To increase the Splunk subsearch row limit over the default of 50,000, create/update the settings in an application specific limits.conf. Create or edit limits.conf in `$SPLUNK_HOME/etc/apps/cisco-catalyst-app/local/` and set the stanzas using the following examples (time, mb, and rows should match or slightly exceed your device count).  
+ 
+ Example with defaults:
+```
+[join]
+subsearch_maxtime = 60
+subsearch_maxout = 50000
 
+[stats]
+maxresultrows = 50000
+
+[mvexpand]
+max_mem_usage_mb = 500
 ```
-[searchresults]
-maxresultrows = X0000
+
+Example for 200,000 endpoint environment:  
 ```
+[join]
+subsearch_maxtime = 300
+subsearch_maxout = 201000
+
+[stats]
+maxresultrows = 201000
+
+[mvexpand]
+max_mem_usage_mb = 1000
+```
+Restart Splunk after making this change. 
+
 ---
 
 # Change Navigation to only show Comply to Connect (C2C) Views - Optional  
