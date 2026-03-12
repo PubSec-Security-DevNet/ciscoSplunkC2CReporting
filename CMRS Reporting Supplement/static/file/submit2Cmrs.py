@@ -3,6 +3,7 @@ Script Name: submit2Cmrs.py
 Description: Reporting automation to submit C2C reporting requirements to CMRS from the Cisco C2C Reporting App 3.0
 Author: Chad Mitchell, chadmi@cisco.com
 Version: 1.1
+Contributors: Thomas Barbour (GDIT)
 """
 
 import logging
