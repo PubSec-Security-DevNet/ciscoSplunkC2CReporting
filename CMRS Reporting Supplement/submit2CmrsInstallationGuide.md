@@ -4,45 +4,50 @@
 ## Table of Contents
 - [Cisco Comply to Connect (C2C) submit2Cmrs Automated Reporting Guide](#cisco-comply-to-connect-c2c-submit2cmrs-automated-reporting-guide)
   - [Table of Contents](#table-of-contents)
-- [1. Copy Files to Reporting Application Server](#1-copy-files-to-reporting-application-server)
-- [2. File Paths and Submission Mode](#2-file-paths-and-submission-mode)
-- [3. Publisher and Organizational Metadata](#3-publisher-and-organizational-metadata)
-- [4. API Connectivity and Security](#4-api-connectivity-and-security)
-- [5. Operational Parameters](#5-operational-parameters)
-- [6. Compliance Rule Mapping](#6-compliance-rule-mapping)
-- [7. Recurring Automatic Submission to CMRS](#7-recurring-automatic-submission-to-cmrs)
+- [Copy Files to Reporting Application Server](#copy-files-to-reporting-application-server)
+  - [Script Files](#script-files)
+- [File Paths and Submission Mode](#file-paths-and-submission-mode)
+- [Publisher and Organizational Metadata](#publisher-and-organizational-metadata)
+- [API Connectivity and Security](#api-connectivity-and-security)
+- [Operational Parameters](#operational-parameters)
+- [Compliance Rule Mapping](#compliance-rule-mapping)
+- [Recurring Automatic Submission to CMRS](#recurring-automatic-submission-to-cmrs)
     - [Linux: Using cron jobs](#linux-using-cron-jobs)
     - [Windows: Using Task Scheduler](#windows-using-task-scheduler)
 
 ---
 
-This script automates the reporting of Comply-to-Connect (C2C) endpoint data. It transforms raw device information (exported from the Cisco C2C 3.0 Reporting Tool) into a standardized XML format required by the Department of Defense (DoD) for continuous monitoring and risk scoring (CMRS).
+This script automates the reporting of Comply-to-Connect (C2C) endpoint data. It transforms raw device information (exported from the Cisco C2C 3.0 Reporting Tool) into a standardized XML format required by the Department of Defense (DoD) for Continuous Monitoring and Risk Scoring (CMRS).
 
 ---
 
-# 1. Copy Files to Reporting Application Server
+# Copy Files to Reporting Application Server
 Copy both `cmrsCustomerData.py` and `submit2Cmrs.py` files to the Search Head server on your environment where the Cisco C2C Reporting Application 3.0 is running.
 
 **Recommended Paths:**
 *   **Linux (User Home):** `/home/<user>/`
 *   **Windows (User Documents):** `C:\Users\<user>\Documents`
 
+## Script Files  
+[submit2Cmrs.py](static/file/submit2Cmrs.py)  
+[cmrsCustomerData.py](static/file/cmrsCustomerData.py)  
+
 ---
 
-# 2. File Paths and Submission Mode
+# File Paths and Submission Mode
 The `cmrsCustomerData.py` file acts as the central configuration point for the reporting script. It defines how the script locates data, identifies the reporting entity to the DoD, and connects to the DISA CMRS API.
 
 These settings determine where the script pulls raw data and whether it sends that data directly to an API or saves it to a local file.
 
 | Variable | Description | Default |
 | :--- | :--- | :--- |
-| `c2cReportPath` | The absolute path to the CSV output from the reporting tool (e.g., Splunk lookup). | `/opt/splunk/.../cisco_catalyst_analytics_reports.csv` |
+| `c2cReportPath` | The absolute path to the CSV output from the reporting tool (e.g., Splunk lookup). | `/opt/splunk/etc/apps/cisco-catalyst-app/lookups/cisco_catalyst_analytics_reports.csv` |
 | `offlineUpload` | Set to `True` to generate a local XML file; `False` to attempt direct SOAP API submission. | `False` |
 | `offlineReport` | The filename/path for the generated XML when `offlineUpload` is enabled. | `./offlineCMRSReport.xml` |
 
 ---
 
-# 3. Publisher and Organizational Metadata
+# Publisher and Organizational Metadata
 This section identifies your specific installation and organizational hierarchy to the DISA CMRS system. These values are typically assigned during your CMRS registration.
 
 | Variable | Description | Default/Example |
@@ -57,7 +62,7 @@ This section identifies your specific installation and organizational hierarchy 
 
 ---
 
-# 4. API Connectivity and Security
+# API Connectivity and Security
 These variables define the secure connection to the DISA CMRS SOAP endpoint.
 
 *   **SOAP Endpoint:** `https://example.com/soap/submit`
@@ -69,7 +74,7 @@ These variables define the secure connection to the DISA CMRS SOAP endpoint.
 
 ---
 
-# 5. Operational Parameters
+# Operational Parameters
 Settings used to tune the performance and logic of the reporting script.
 
 *   **`reportingBatchSize`**: Defines how many endpoint records are included in a single XML upload.
@@ -78,7 +83,7 @@ Settings used to tune the performance and logic of the reporting script.
 
 ---
 
-# 6. Compliance Rule Mapping
+# Compliance Rule Mapping
 These variables map the column headers in your CSV report to the specific C2C rules required by CMRS. If you modify the search macros in your reporting app, update these names to match.
 
 | C2C Rule | CSV Column Mapping (Examples) |
@@ -96,7 +101,7 @@ These variables map the column headers in your CSV report to the specific C2C ru
 
 ---
 
-# 7. Recurring Automatic Submission to CMRS
+# Recurring Automatic Submission to CMRS
 After the `cmrsCustomerData.py` file has been updated, reporting can be automated via setting up recurring execution of the `submit2Cmrs.py` script on Linux and Windows systems running the reporting application.
 
 ### Linux: Using cron jobs
