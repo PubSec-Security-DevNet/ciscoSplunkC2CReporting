@@ -69,7 +69,8 @@ These variables define the secure connection to the DISA CMRS SOAP endpoint.
 *   **Authentication:** The script uses Mutual TLS (mTLS). Provide the paths to your PEM-encoded certificates.
     *   `certFile`: Your client certificate.
     *   `keyFile`: Your private key.
-    *   `caBundle`: The CA certificate used to verify the DISA server.
+    *   `caBundle`: The CA certificate used to verify the DISA server.  
+    > **Implementation Note:** Ensure that the `certFile` and `keyFile` are stored securely with restricted file system permissions. The script requires read access to these files to successfully authenticate with the DISA CMRS gateway.  
 *   **SOAP Action:** `SubmitRecords` (This value is static and should not be modified).
 
 ---
@@ -96,8 +97,6 @@ These variables map the column headers in your CSV report to the specific C2C ru
 | Endpoint App WL | `C2CAppWlResult` |
 | PKI Roots | `C2CPKIRootsResult` |
 | Endpoint Monitoring | `C2CEDRResult` |
-
-> **Implementation Note:** Ensure that the `certFile` and `keyFile` are stored securely with restricted file system permissions. The script requires read access to these files to successfully authenticate with the DISA CMRS gateway.
 
 ---
 
