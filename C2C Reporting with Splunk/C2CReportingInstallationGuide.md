@@ -138,6 +138,8 @@ Cisco Catalyst Add-on for Splunk
 [https://splunkbase.splunk.com/app/7538](https://splunkbase.splunk.com/app/7538)  
 ![Cisco Catalyst Add-on for Splunk Webpage image](static/img/addon7538.png)
 
+> **Implementation Note:** The Cisco Catalyst Enhanced Netflow Add-on for Splunk prerequisite is NOT required for Comply to Connect (C2C) Reporting
+
 Tenable Add-On for Splunk - Optional  
 [https://splunkbase.splunk.com/app/4060](https://splunkbase.splunk.com/app/4060)  
 ![Tenable Add-On for Splunk](static/img/addon4060.png)
