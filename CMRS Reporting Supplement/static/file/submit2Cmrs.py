@@ -2,7 +2,7 @@
 Script Name: submit2Cmrs.py
 Description: Reporting automation to submit C2C reporting requirements to CMRS from the Cisco C2C Reporting App 3.0
 Author: Chad Mitchell, chadmi@cisco.com
-Version: 1.1
+Version: 1.2
 Contributors: Brent Matlock (Cisco), Thomas Barbour (GDIT)
 """
 
@@ -259,10 +259,10 @@ def process_row(row):
               <tagged_value:taggedString name="C2C Last Auth Access Assignment" value="{{ C2C_Last_Auth_Access_Assignment }}" />
               <tagged_value:taggedString name="C2C Primary Auth" value="{{ C2C_Primary_Auth }}" />
               <tagged_value:taggedString name="C2C Secondary Auth" value="{{ C2C_Primary_Auth }}" />
-              <tagged_value:taggedString name="C2C ICAM Last Auth Device" value="{{ ICAM_Device }}"/><!--Common Name followed by double-dash delimiter then cert SN -->
+              <tagged_value:taggedString name="C2C ICAM Last Auth Device" value="{{ ICAM_Device }}"/>
               <tagged_value:taggedString name="C2C ICAM Last Auth Device CA" value="{{ ICAM_Device_CA }}"/>
               <tagged_value:taggedString name="C2C ICAM Last Auth Device Root CA" value="{{ ICAM_Device_Sub_CA }}"/>
-              <tagged_value:taggedString name="C2C ICAM Last Auth Device" value="{{ ICAM_User }}"/><!--Common Name followed by double-dash delimiter then cert SN -->
+              <tagged_value:taggedString name="C2C ICAM Last Auth Device" value="{{ ICAM_User }}"/>
               <tagged_value:taggedString name="C2C ICAM Last Auth Device CA" value="{{ ICAM_User_CA }}"/>
               <tagged_value:taggedString name="C2C ICAM Last Auth Device Root CA" value="{{ ICAM_User_Sub_CA }}"/>
               <tagged_value:taggedString name="C2C Wired Connections" value="{{ Wired_Connections }}" />
@@ -276,7 +276,18 @@ def process_row(row):
     
     # Clean and transform the record
     deviceRecord = {key.replace(".", "_").replace(" ", "_"): (value.replace('\n', ' ') if isinstance(value, str) and value != 'N/A' and value != 'None' else "") for key, value in row.items()}
-    
+
+    # Set iseLastSeen to ISO8601 Format
+    raw_ise_time = deviceRecord.get("iseLastSeen", "")
+    if raw_ise_time and raw_ise_time not in ["N/A", "None", ""]:
+        try:
+            # Convert Unix ctime to ISO format
+            dt_obj = datetime.strptime(raw_ise_time, "%a %b %d %H:%M:%S %Z %Y")
+            deviceRecord["iseLastSeen"] = dt_obj.isoformat()
+        except (ValueError, TypeError):
+            # If parsing fails, it keeps the original value
+            pass
+
     # Set recordId with Coalesce
     deviceRecord["recordId"] = deviceRecord.get('uuid') or deviceRecord.get('BIOSGUID') or deviceRecord.get('record_id') or deviceRecord.get('macAddress')
 
