@@ -15,10 +15,6 @@ from datetime import datetime, timedelta
 from cmrsCustomerData import *
 import multiprocessing
 
-# Multiprocess configuration - Adjust for number of CPU processes to use for parallel processing
-# Set to None to use all available CPU cores
-maxConcurrentProcesses = 8
-
 # --- Logger setup ---
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)

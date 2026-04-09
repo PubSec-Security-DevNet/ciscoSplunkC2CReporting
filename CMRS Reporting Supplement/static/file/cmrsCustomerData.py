@@ -62,3 +62,9 @@ c2cEndpointAppWlRule = "C2CPatchResult"
 c2cPkiRootsRule = ""
 c2cEndpointMonitorRule = ""
 c2cPatchingRule = "C2CPatchResult"
+
+# =========================================
+# Multiprocess configuration - Adjust for number of CPU processes to use for parallel processing
+# Set to None to use all available CPU cores
+# =========================================
+maxConcurrentProcesses = 8
