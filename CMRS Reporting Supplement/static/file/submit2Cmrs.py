@@ -122,7 +122,7 @@ def createReportEnvelope(deviceBatch):
         </wsnt:ProducerReference>
         <wsnt:Message>
           <ar:AssessmentReport xmlns:ar="http://metadata.dod.mil/mdr/ns/netops/shared_data/assessment_report/0.41" xmlns:device="http://metadata.dod.mil/mdr/ns/netops/shared_data/device/0.41" xmlns:cpe="http://scap.nist.gov/schema/cpe-record/0.1" xmlns:tagged_value="http://metadata.dod.mil/mdr/ns/netops/shared_data/tagged_value/0.41" xmlns:cndc="http://metadata.dod.mil/mdr/ns/netops/net_defense/cnd-core/0.41">
-          {{ deviceBatch }}
+{{ deviceBatch }}
           </ar:AssessmentReport>
         </wsnt:Message>
       </wsnt:NotificationMessage>
@@ -324,7 +324,17 @@ def process_row(row):
     # Render the template for this single device
     try:
         jinjaTemplate = Template(deviceTemplate)
-        return jinjaTemplate.render(deviceRecord)
+        rendered = jinjaTemplate.render(deviceRecord)
+        # Remove blank lines and reconstruct with proper indentation
+        lines = [line for line in rendered.split("\n") if line.strip()]
+        # Find minimum indentation to remove
+        min_indent = min(len(line) - len(line.lstrip()) for line in lines) if lines else 0
+        # Strip base indentation and add proper indentation (12 spaces for reportObject)
+        result_lines = []
+        for line in lines:
+            stripped = line[min_indent:] if len(line) > min_indent else line.lstrip()
+            result_lines.append("          " + stripped)
+        return "\n".join(result_lines)
     except Exception as e:
         # Using print for immediate feedback from worker processes
         print(f"Template render error for row {deviceRecord.get('recordId')}: {e}")
