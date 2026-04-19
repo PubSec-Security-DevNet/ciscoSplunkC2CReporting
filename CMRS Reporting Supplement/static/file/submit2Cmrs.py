@@ -2,7 +2,7 @@
 Script Name: submit2Cmrs.py
 Description: Reporting automation to submit C2C reporting requirements to CMRS from the Cisco C2C Reporting App 3.0
 Author: Chad Mitchell, chadmi@cisco.com
-Version: 1.2
+Version: 1.3
 Contributors: Brent Matlock (Cisco), Thomas Barbour (GDIT)
 """
 
@@ -145,127 +145,126 @@ def createReportEnvelope(deviceBatch):
 def process_row(row):
     deviceTemplate = '''
           <ar:reportObject>
-            <ar:device timestamp="{{ iseLastSeen }}">
+            <ar:device {% if iseLastSeen %}timestamp="{{ iseLastSeen }}"{% endif %}>
               <device:device_ID>
-                <cndc:resource>"{{ publisherName }}"</cndc:resource>
-                <cndc:record_identifier>"{{ recordId }}"</cndc:record_identifier>
+                {% if publisherName %}<cndc:resource>"{{ publisherName }}"</cndc:resource>{% endif %}
+                {% if recordId %}<cndc:record_identifier>"{{ recordId }}"</cndc:record_identifier>{% endif %}
               </device:device_ID>
               <device:operational_attributes>
-                <cndc:resource>"{{ publisherName }}"</cndc:resource>
-                <cndc:record_identifier>"{{ recordId }}"</cndc:record_identifier>
+                {% if publisherName %}<cndc:resource>"{{ publisherName }}"</cndc:resource>{% endif %}
+                {% if recordId %}<cndc:record_identifier>"{{ recordId }}"</cndc:record_identifier>{% endif %}
               </device:operational_attributes>
               <device:identifiers>
                 <device:FQDN>
-                  <device:host_name>"{{ dnsName }}"</device:host_name>
-                  <device:realm>"{{ AD_User_DNS_Domain }}"</device:realm>
+                  {% if dnsName %}<device:host_name>"{{ dnsName }}"</device:host_name>{% endif %}
+                  {% if AD_User_DNS_Domain %}<device:realm>"{{ AD_User_DNS_Domain }}"</device:realm>{% endif %}
                 </device:FQDN>
               </device:identifiers>
               <device:configuration>
                 <device:network_configuration>
-                  <device:network_interface_ID>"{{ NAS_Port_Id }}"</device:network_interface_ID>
+                  {% if NAS_Port_Id %}<device:network_interface_ID>"{{ NAS_Port_Id }}"</device:network_interface_ID>{% endif %}
                   <device:host_network_data>
-                    <device:connection_mac_address>"{{ macAddress }}"</device:connection_mac_address>
-                    <device:connection_ip>
+                    {% if macAddress %}<device:connection_mac_address>"{{ macAddress }}"</device:connection_mac_address>{% endif %}
+                    {% if Ipv4Address %}<device:connection_ip>
                       <cndc:IPv4>"{{ Ipv4Address }}"</cndc:IPv4>
-                    </device:connection_ip>
-                    <device:connection_ip>
+                    </device:connection_ip>{% endif %}
+                    {% if Ipv6Address %}<device:connection_ip>
                       <cndc:IPv6>"{{ Ipv6Address }}"</cndc:IPv6>
-                    </device:connection_ip>
+                    </device:connection_ip>{% endif %}
                   </device:host_network_data>
                 </device:network_configuration>
                 <device:cpe_inventory>
                   <device:cpe_record>
-                    <cpe:platformName>
+                    {% if osPlatformName %}<cpe:platformName>
                       <cpe:assessedName name="{{ osPlatformName }}"/>
-                    </cpe:platformName>
-                    <tagged_value:taggedString name="OSVendor" value="{{ osVendor }}"/>
-                    <tagged_value:taggedString name="OSName" value="{{ osCompositeName }}"/>
-                    <tagged_value:taggedString name="OSVersion" value="{{ osVersion }}"/>
-                    <tagged_value:taggedString name="OSEdition" value="{{ osEdition }}"/>
-                    <tagged_value:taggedString name="OSMktVersion" value="{{ osMktVersion }}"/>
-                    <tagged_value:taggedString name="OSArch" value="{{ osArch }}"/>
-                    <tagged_value:taggedString name="OSCompositeName" value="{{ osCompositeName }}"/>
+                    </cpe:platformName>{% endif %}
+                    {% if osVendor %}<tagged_value:taggedString name="OSVendor" value="{{ osVendor }}"/>{% endif %}
+                    {% if osCompositeName %}<tagged_value:taggedString name="OSName" value="{{ osCompositeName }}"/>{% endif %}
+                    {% if osVersion %}<tagged_value:taggedString name="OSVersion" value="{{ osVersion }}"/>{% endif %}
+                    {% if osEdition %}<tagged_value:taggedString name="OSEdition" value="{{ osEdition }}"/>{% endif %}
+                    {% if osMktVersion %}<tagged_value:taggedString name="OSMktVersion" value="{{ osMktVersion }}"/>{% endif %}
+                    {% if osArch %}<tagged_value:taggedString name="OSArch" value="{{ osArch }}"/>{% endif %}
+                    {% if osCompositeName %}<tagged_value:taggedString name="OSCompositeName" value="{{ osCompositeName }}"/>{% endif %}
                   </device:cpe_record>
                 </device:cpe_inventory>
               </device:configuration>
-              <tagged_value:taggedString name="ccsafa.dod.mil" value="{{ ccsafa_dod_mil }}"/>
-              <tagged_value:taggedString name="geolocation.dod.mil" value="{{ geolocation_dod_mil }}"/>
-              <tagged_value:taggedString name="ownorg.dod.mil" value="{{ ownorg_dod_mil }}"/>
-              <tagged_value:taggedString name="cndsp.dod.mil" value="{{ cndsp_dod_mil }}"/>
-              <tagged_value:taggedString name="adminorg.dod.mil" value="{{ adminorg_dod_mil }}"/>
-              <tagged_value:taggedString name="cocomaor.dod.mil" value="{{ cocomaor_dod_mil }}"/>
-              <tagged_value:taggedString name="SwLocation" value="{{ Location }}"/>
-              <tagged_value:taggedString name="SwHostname" value="{{ NetworkDeviceName }}"/>
-              <tagged_value:taggedString name="SwPortDescription" value="{{ NAS_Port_Id }}"/>
-              <tagged_value:taggedString name="SwPortAlias" value=""/>
-              <tagged_value:taggedString name="SegmentPath" value=""/>
-              <tagged_value:taggedString name="DeviceRole" value=""/>
-              <tagged_value:taggedString name="VendorClassificationInfo" value="{{ SystemManufacturer }}"/>
-              <tagged_value:taggedString name="NetworkFunction" value=""/>
-              <tagged_value:taggedString name="ManufacturerClassification" value="{{ SystemManufacturer }}"/>
-              <tagged_value:taggedString name="GuestCorporateState" value=""/>
-              <tagged_value:taggedString name="ClassificationType" value=""/>
-              <tagged_value:taggedString name="SystemRoles" value="{{ cybercomCategory }}"/>
-              <tagged_value:taggedString name="NICVendor" value="{{ NICVendor }}"/>
-              <tagged_value:taggedString name="username" value="{{ UserName }}"/>
-              <tagged_value:taggedString name="BIOSGUID" value="{{ BIOSGUID }}"/>
-              <tagged_value:taggedString name="BiosVendor" value="{{ BiosVendor }}"/>
-              <tagged_value:taggedString name="BiosSerialNumber" value="{{ BiosSerialNumber }}"/>
-              <tagged_value:taggedString name="BiosVersion" value="{{ BiosVersion }}"/>
-              <tagged_value:taggedString name="BootPartitionTotalSpace" value="{{ BootPartitionTotalSpace }}"/>
-              <tagged_value:taggedString name="TPMVersion" value="{{ TPMVersion }}"/>
-              <tagged_value:taggedString name="SysvolDescription" value=""/>
-              <tagged_value:taggedString name="SysvolFileSystem" value=""/>
-              <tagged_value:taggedString name="SysvolFreeSpace" value=""/>
-              <tagged_value:taggedString name="SysvolName" value=""/>
-              <tagged_value:taggedString name="SysvolTotalSpace" value=""/>
-              <tagged_value:taggedString name="FreeDiskSpace" value="{{ BootPartitionFreeSpace }}"/>
-              <tagged_value:taggedString name="TotalDiskSpace" value="{{ BootPartitionTotalSpace }}"/>
-              <tagged_value:taggedString name="NumOfCPU" value="{{ NumCpuCores }}"/>
-              <tagged_value:taggedString name="SystemManufacturer" value="{{ SystemManufacturer }}"/>
-              <tagged_value:taggedString name="SystemModel" value="{{ SystemModel }}"/>
-              <tagged_value:taggedString name="NumInstalledCPU" value="{{ NumInstalledCPU }}"/>
-              <tagged_value:taggedString name="TotalPhysicalMemory" value="{{ TotalPhysicalMemory }}"/>
-              <tagged_value:taggedString name="MotherBoard Manufacturer" value="{{ BiosVendor }}"/>
-              <tagged_value:taggedString name="MotherBoard Serial Number" value="{{ BiosSerialNumber }}"/> 
-              <tagged_value:taggedString name="MotherBoard Version" value="{{ BiosVersion }}"/>
-              <tagged_value:taggedString name="CPUManufacturer" value="{{ CpuVersion }}"/>
-              <tagged_value:taggedString name="CPUSpeed" value="{{ CPUSpeed }}"/>
-              <tagged_value:taggedString name="CPUCoreCount" value="{{ NumCpuCores }}"/>
-              <tagged_value:taggedString name="CyberComCategory" value="{{ cybercomCategory }}"/>
-              <tagged_value:taggedString name="C2C Managed" value="{{ c2cManaged }}"/>
-              <tagged_value:taggedString name="Sensor version" value="{{ iseVersion }}"/>
-              <tagged_value:taggedString name="Sensor ID" value="{{ iseSerial }}"/>
-              <tagged_value:taggedString name="Sensor Publisher Version" value="Cisco ISE Reporting App Version {{ publisherVersion }}"/>
-              <tagged_value:taggedString name="rule C2C OverallComplianceStatus" value="{{ PostureStatus }}"/>
-              <tagged_value:taggedString name="rule C2C EndpointFirewall" value="{{ c2cFirewallRule }}"/>
-              <tagged_value:taggedString name="rule C2C EndpointAntiMalware" value="{{ c2cEndpointMalwareRule }}"/>
-              <tagged_value:taggedString name="rule C2C EndpointDAREncryption" value="{{ c2cEndpointEncryptRule }}"/>
-              <tagged_value:taggedString name="rule C2C PatchAgent" value="{{ c2cPatchingRule }}"/>
-              <tagged_value:taggedString name="rule C2C VulnScanCurrent" value="{{ VulnScanCurrent }}"/>
-              <tagged_value:taggedString name="rule C2C EndpointAppWhitelisting" value="{{ c2cEndpointAppWlRule }}"/>
-              <tagged_value:taggedString name="rule C2C PKITrustRoots" value="{{ c2cPkiRootsRule }}"/>
-              <tagged_value:taggedString name="rule C2C EndpointMonitoring" value="{{ c2cEndpointMonitorRule }}" />
-              <tagged_value:taggedString name="rule C2C Patching" value="{{ c2cPatchingRule }}" />
-              <tagged_value:taggedString name="C2C Auth Result" value="{{ C2C_Auth_Result }}" />
-              <tagged_value:taggedString name="C2C Authorization Source" value="{{ C2C_Authorization_Source }}" />
-              <tagged_value:taggedString name="C2C Connection" value="{{ C2C_Connection }}" />
-              <tagged_value:taggedString name="C2C Device Token" value="{{ C2C_Device_Token }}" />
-              <tagged_value:taggedString name="C2C Last Auth" value="{{ C2C_Last_Auth }}" />
-              <tagged_value:taggedString name="C2C Last Auth Access Assignment" value="{{ C2C_Last_Auth_Access_Assignment }}" />
-              <tagged_value:taggedString name="C2C Primary Auth" value="{{ C2C_Primary_Auth }}" />
-              <tagged_value:taggedString name="C2C Secondary Auth" value="{{ C2C_Primary_Auth }}" />
-              <tagged_value:taggedString name="C2C ICAM Last Auth Device" value="{{ ICAM_Device }}"/>
-              <tagged_value:taggedString name="C2C ICAM Last Auth Device CA" value="{{ ICAM_Device_CA }}"/>
-              <tagged_value:taggedString name="C2C ICAM Last Auth Device Root CA" value="{{ ICAM_Device_Sub_CA }}"/>
-              <tagged_value:taggedString name="C2C ICAM Last Auth Device" value="{{ ICAM_User }}"/>
-              <tagged_value:taggedString name="C2C ICAM Last Auth Device CA" value="{{ ICAM_User_CA }}"/>
-              <tagged_value:taggedString name="C2C ICAM Last Auth Device Root CA" value="{{ ICAM_User_Sub_CA }}"/>
-              <tagged_value:taggedString name="C2C Wired Connections" value="{{ Wired_Connections }}" />
-              <tagged_value:taggedString name="C2C Wireless Connections" value="{{ Wireless_Connections }}" />
-              <tagged_value:taggedString name="C2C Access Level Unknown" value="{{ Total_Full_Access }}" />
-              <tagged_value:taggedString name="C2C Access Level Remediation" value="{{ Total_Remediation }}" />
-              <tagged_value:taggedString name="C2C Access Level Full Access" value="{{ Total_Unknown }}" />
+              {% if ccsafa_dod_mil %}<tagged_value:taggedString name="ccsafa.dod.mil" value="{{ ccsafa_dod_mil }}"/>{% endif %}
+              {% if geolocation_dod_mil %}<tagged_value:taggedString name="geolocation.dod.mil" value="{{ geolocation_dod_mil }}"/>{% endif %}
+              {% if ownorg_dod_mil %}<tagged_value:taggedString name="ownorg.dod.mil" value="{{ ownorg_dod_mil }}"/>{% endif %}
+              {% if cndsp_dod_mil %}<tagged_value:taggedString name="cndsp.dod.mil" value="{{ cndsp_dod_mil }}"/>{% endif %}
+              {% if adminorg_dod_mil %}<tagged_value:taggedString name="adminorg.dod.mil" value="{{ adminorg_dod_mil }}"/>{% endif %}
+              {% if cocomaor_dod_mil %}<tagged_value:taggedString name="cocomaor.dod.mil" value="{{ cocomaor_dod_mil }}"/>{% endif %}
+              {% if Location %}<tagged_value:taggedString name="SwLocation" value="{{ Location }}"/>{% endif %}
+              {% if NetworkDeviceName %}<tagged_value:taggedString name="SwHostname" value="{{ NetworkDeviceName }}"/>{% endif %}
+              {% if NAS_Port_Id %}<tagged_value:taggedString name="SwPortDescription" value="{{ NAS_Port_Id }}"/>{% endif %}
+              {% if SwPortAlias %}<tagged_value:taggedString name="SwPortAlias" value="{{ SwPortAlias }}"/>{% endif %}
+              {% if SegmentPath %}<tagged_value:taggedString name="SegmentPath" value="{{ SegmentPath }}"/>{% endif %}
+              {% if DeviceRole %}<tagged_value:taggedString name="DeviceRole" value="{{ DeviceRole }}"/>{% endif %}
+              {% if SystemManufacturer %}<tagged_value:taggedString name="VendorClassificationInfo" value="{{ SystemManufacturer }}"/>{% endif %}
+              {% if NetworkFunction %}<tagged_value:taggedString name="NetworkFunction" value="{{ NetworkFunction }}"/>{% endif %}
+              {% if SystemManufacturer %}<tagged_value:taggedString name="ManufacturerClassification" value="{{ SystemManufacturer }}"/>{% endif %}
+              {% if GuestCorporateState %}<tagged_value:taggedString name="GuestCorporateState" value="{{ GuestCorporateState }}"/>{% endif %}
+              {% if ClassificationType %}<tagged_value:taggedString name="ClassificationType" value="{{ ClassificationType }}"/>{% endif %}
+              {% if NICVendor %}<tagged_value:taggedString name="NICVendor" value="{{ NICVendor }}"/>{% endif %}
+              {% if UserName %}<tagged_value:taggedString name="username" value="{{ UserName }}"/>{% endif %}
+              {% if BIOSGUID %}<tagged_value:taggedString name="BIOSGUID" value="{{ BIOSGUID }}"/>{% endif %}
+              {% if BiosVendor %}<tagged_value:taggedString name="BiosVendor" value="{{ BiosVendor }}"/>{% endif %}
+              {% if BiosSerialNumber %}<tagged_value:taggedString name="BiosSerialNumber" value="{{ BiosSerialNumber }}"/>{% endif %}
+              {% if BiosVersion %}<tagged_value:taggedString name="BiosVersion" value="{{ BiosVersion }}"/>{% endif %}
+              {% if BootPartitionTotalSpace %}<tagged_value:taggedString name="BootPartitionTotalSpace" value="{{ BootPartitionTotalSpace }}"/>{% endif %}
+              {% if TPMVersion %}<tagged_value:taggedString name="TPMVersion" value="{{ TPMVersion }}"/>{% endif %}
+              {% if SysvolDescription %}<tagged_value:taggedString name="SysvolDescription" value="{{ SysvolDescription }}"/>{% endif %}
+              {% if SysvolFileSystem %}<tagged_value:taggedString name="SysvolFileSystem" value="{{ SysvolFileSystem }}"/>{% endif %}
+              {% if SysvolFreeSpace %}<tagged_value:taggedString name="SysvolFreeSpace" value="{{ SysvolFreeSpace }}"/>{% endif %}
+              {% if SysvolName %}<tagged_value:taggedString name="SysvolName" value="{{ SysvolName }}"/>{% endif %}
+              {% if SysvolTotalSpace %}<tagged_value:taggedString name="SysvolTotalSpace" value="{{ SysvolTotalSpace }}"/>{% endif %}
+              {% if BootPartitionFreeSpace %}<tagged_value:taggedString name="FreeDiskSpace" value="{{ BootPartitionFreeSpace }}"/>{% endif %}
+              {% if BootPartitionTotalSpace %}<tagged_value:taggedString name="TotalDiskSpace" value="{{ BootPartitionTotalSpace }}"/>{% endif %}
+              {% if NumCpuCores %}<tagged_value:taggedString name="NumOfCPU" value="{{ NumCpuCores }}"/>{% endif %}
+              {% if SystemManufacturer %}<tagged_value:taggedString name="SystemManufacturer" value="{{ SystemManufacturer }}"/>{% endif %}
+              {% if SystemModel %}<tagged_value:taggedString name="SystemModel" value="{{ SystemModel }}"/>{% endif %}
+              {% if NumInstalledCPU %}<tagged_value:taggedString name="NumInstalledCPU" value="{{ NumInstalledCPU }}"/>{% endif %}
+              {% if TotalPhysicalMemory %}<tagged_value:taggedString name="TotalPhysicalMemory" value="{{ TotalPhysicalMemory }}"/>{% endif %}
+              {% if BiosVendor %}<tagged_value:taggedString name="MotherBoard Manufacturer" value="{{ BiosVendor }}"/>{% endif %}
+              {% if BiosSerialNumber %}<tagged_value:taggedString name="MotherBoard Serial Number" value="{{ BiosSerialNumber }}"/>{% endif %}
+              {% if BiosVersion %}<tagged_value:taggedString name="MotherBoard Version" value="{{ BiosVersion }}"/>{% endif %}
+              {% if CpuVersion %}<tagged_value:taggedString name="CPUManufacturer" value="{{ CpuVersion }}"/>{% endif %}
+              {% if CPUSpeed %}<tagged_value:taggedString name="CPUSpeed" value="{{ CPUSpeed }}"/>{% endif %}
+              {% if NumCpuCores %}<tagged_value:taggedString name="CPUCoreCount" value="{{ NumCpuCores }}"/>{% endif %}
+              {% if cybercomCategory %}<tagged_value:taggedString name="CyberComCategory" value="{{ cybercomCategory }}"/>{% endif %}
+              {% if c2cManaged %}<tagged_value:taggedString name="C2C Managed" value="{{ c2cManaged }}"/>{% endif %}
+              {% if iseVersion %}<tagged_value:taggedString name="Sensor version" value="{{ iseVersion }}"/>{% endif %}
+              {% if iseSerial %}<tagged_value:taggedString name="Sensor ID" value="{{ iseSerial }}"/>{% endif %}
+              {% if publisherVersion %}<tagged_value:taggedString name="Sensor Publisher Version" value="Cisco ISE Reporting App Version {{ publisherVersion }}"/>{% endif %}
+              {% if PostureStatus %}<tagged_value:taggedString name="rule C2C OverallComplianceStatus" value="{{ PostureStatus }}"/>{% endif %}
+              {% if c2cFirewallRule %}<tagged_value:taggedString name="rule C2C EndpointFirewall" value="{{ c2cFirewallRule }}"/>{% endif %}
+              {% if c2cEndpointMalwareRule %}<tagged_value:taggedString name="rule C2C EndpointAntiMalware" value="{{ c2cEndpointMalwareRule }}"/>{% endif %}
+              {% if c2cEndpointEncryptRule %}<tagged_value:taggedString name="rule C2C EndpointDAREncryption" value="{{ c2cEndpointEncryptRule }}"/>{% endif %}
+              {% if c2cPatchAgentRule %}<tagged_value:taggedString name="rule C2C PatchAgent" value="{{ c2cPatchAgentRule }}"/>{% endif %}
+              {% if VulnScanCurrent %}<tagged_value:taggedString name="rule C2C VulnScanCurrent" value="{{ VulnScanCurrent }}"/>{% endif %}
+              {% if c2cEndpointAppWlRule %}<tagged_value:taggedString name="rule C2C EndpointAppWhitelisting" value="{{ c2cEndpointAppWlRule }}"/>{% endif %}
+              {% if c2cPkiRootsRule %}<tagged_value:taggedString name="rule C2C PKITrustRoots" value="{{ c2cPkiRootsRule }}"/>{% endif %}
+              {% if c2cEndpointMonitorRule %}<tagged_value:taggedString name="rule C2C EndpointMonitoring" value="{{ c2cEndpointMonitorRule }}" />{% endif %}
+              {% if c2cPatchingRule %}<tagged_value:taggedString name="rule C2C Patching" value="{{ c2cPatchingRule }}" />{% endif %}
+              {% if C2C_Auth_Result %}<tagged_value:taggedString name="C2C Auth Result" value="{{ C2C_Auth_Result }}" />{% endif %}
+              {% if C2C_Authorization_Source %}<tagged_value:taggedString name="C2C Authorization Source" value="{{ C2C_Authorization_Source }}" />{% endif %}
+              {% if C2C_Connection %}<tagged_value:taggedString name="C2C Connection" value="{{ C2C_Connection }}" />{% endif %}
+              {% if C2C_Device_Token %}<tagged_value:taggedString name="C2C Device Token" value="{{ C2C_Device_Token }}" />{% endif %}
+              {% if C2C_Last_Auth %}<tagged_value:taggedString name="C2C Last Auth" value="{{ C2C_Last_Auth }}" />{% endif %}
+              {% if C2C_Last_Auth_Access_Assignment %}<tagged_value:taggedString name="C2C Last Auth Access Assignment" value="{{ C2C_Last_Auth_Access_Assignment }}" />{% endif %}
+              {% if C2C_Primary_Auth %}<tagged_value:taggedString name="C2C Primary Auth" value="{{ C2C_Primary_Auth }}" />{% endif %}
+              {% if C2C_Primary_Auth %}<tagged_value:taggedString name="C2C Secondary Auth" value="{{ C2C_Primary_Auth }}" />{% endif %}
+              {% if ICAM_Device %}<tagged_value:taggedString name="C2C ICAM Last Auth Device" value="{{ ICAM_Device }}"/>{% endif %}
+              {% if ICAM_Device_CA %}<tagged_value:taggedString name="C2C ICAM Last Auth Device CA" value="{{ ICAM_Device_CA }}"/>{% endif %}
+              {% if ICAM_Device_Sub_CA %}<tagged_value:taggedString name="C2C ICAM Last Auth Device Root CA" value="{{ ICAM_Device_Sub_CA }}"/>{% endif %}
+              {% if ICAM_User %}<tagged_value:taggedString name="C2C ICAM Last Auth Device" value="{{ ICAM_User }}"/>{% endif %}
+              {% if ICAM_User_CA %}<tagged_value:taggedString name="C2C ICAM Last Auth Device CA" value="{{ ICAM_User_CA }}"/>{% endif %}
+              {% if ICAM_User_Sub_CA %}<tagged_value:taggedString name="C2C ICAM Last Auth Device Root CA" value="{{ ICAM_User_Sub_CA }}"/>{% endif %}
+              {% if Wired_Connections %}<tagged_value:taggedString name="C2C Wired Connections" value="{{ Wired_Connections }}" />{% endif %}
+              {% if Wireless_Connections %}<tagged_value:taggedString name="C2C Wireless Connections" value="{{ Wireless_Connections }}" />{% endif %}
+              {% if Total_Full_Access %}<tagged_value:taggedString name="C2C Access Level Unknown" value="{{ Total_Full_Access }}" />{% endif %}
+              {% if Total_Remediation %}<tagged_value:taggedString name="C2C Access Level Remediation" value="{{ Total_Remediation }}" />{% endif %}
+              {% if Total_Unknown %}<tagged_value:taggedString name="C2C Access Level Full Access" value="{{ Total_Unknown }}" />{% endif %}
             </ar:device>
           </ar:reportObject>
     '''
