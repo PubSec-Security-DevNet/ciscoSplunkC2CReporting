@@ -16,7 +16,7 @@
             system      : "Linux"
             type        : CMD_EXEC
             description : "Disk Space"
-            cmd         : "df -h /"
+            cmd         : "df /"
             expect      : "(.*)$"
 		</custom_item>
     </condition>
