@@ -40,7 +40,7 @@ def submit2Cmrs(xmlEnvelope: str) -> requests.Response:
             data=xmlEnvelope.encode("utf-8"),
             headers=headers,
             cert=(certFile, keyFile),
-            verify=caBundle,
+            verify=pkiTrust,
             timeout=60
         )
 
