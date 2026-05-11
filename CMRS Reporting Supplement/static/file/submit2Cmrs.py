@@ -300,7 +300,7 @@ def process_row(row):
               <device:identifiers>
                 <device:FQDN>
                   {% if dnsName %}<device:host_name>{{ dnsName }}</device:host_name>{% endif %}
-                  {% if AD_User_DNS_Domain %}<device:realm>SIE.LOCATION.{{ AD_User_DNS_Domain }}</device:realm>{% endif %}
+                  {% if AD_User_DNS_Domain %}<device:realm>SITE.LOCATION.{{ AD_User_DNS_Domain }}</device:realm>{% endif %}
                 </device:FQDN>
               </device:identifiers>
               <device:configuration>
