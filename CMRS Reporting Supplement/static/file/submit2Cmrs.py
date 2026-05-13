@@ -10,6 +10,7 @@ import logging
 import csv
 import re
 import requests
+import html
 import time
 from jinja2 import Template
 from datetime import datetime, timedelta
@@ -454,7 +455,8 @@ def process_row(row):
     # Clean and transform the record
     deviceRecord = {
         key.replace(".", "_").replace(" ", "_"): (
-            value.replace('\n', ' ').split('</', 1)[0]
+            # Wrap the existing cleaning logic in html.escape()
+            html.escape(value.replace('\n', ' ').split('</', 1)[0])
             if isinstance(value, str) and value != 'N/A' and value != 'None'
             else ""
         )

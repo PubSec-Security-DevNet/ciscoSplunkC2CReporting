@@ -4,8 +4,7 @@
 # c2cReportPath needs to be the full path to the reporting tool output file
 # This is by default /opt/splunk/etc/apps/cisco-catalyst-app/lookups/cisco_catalyst_analytics_reports.csv
 # For Linux Installations use
-# c2cReportPath = "/opt/splunk/etc/apps/cisco-catalyst-app/lookups/cisco_catalyst_analytics_reports.csv"
-c2cReportPath = "./cisco_catalyst_analytics_reports.csv"
+c2cReportPath = "/opt/splunk/etc/apps/cisco-catalyst-app/lookups/cisco_catalyst_analytics_reports.csv"
 # For Windows Installations use
 # c2cReportPath = "C:\\Program Files\\Splunk\\etc\\apps\\cisco-catalyst-app\\lookups\\cisco_catalyst_analytics_reports.csv"
 
