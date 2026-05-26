@@ -212,7 +212,7 @@ Click **"Add"** to configure the local disk repository if one is not already def
 
 ![Local Disk Repository](static/img/localDisk.png)
 
-Click **"Add"** to configure an SFTP repository if one is not already defined
+Click **"Add"** to configure an SFTP repository if one is not already defined. An SFTP remote repository reachable by ISE and Splunk is a requirement if you do not have one already deployed.
 * **Repository Name:** \<SFTP-Example\>
 * **Protocol:** SFTP
 * **Server Name:** \<IP\Hostname\>
