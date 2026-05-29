@@ -37,7 +37,7 @@ reportingGeolocation = "12345"
 soapEndpoint = "https://adslite.dev.cmrs.com"    # DISA CMRS SOAP Endpoint
 certFile = "client.crt"             # Path to your client certificate (PEM)
 keyFile = "client.key"              # Path to your private key (PEM)
-pkiTrust = "cmrsProvidedTrust.crt"  # Trusted CMRS certificate to verify the server. This should be a single file with the full chain (PEM encoded) of trust to the ADSLITE endpoint
+pkiTrust = "cmrsProvidedTrust.crt"  # Trusted CMRS certificate to verify the server. This should be a single file with the full chain (PEM encoded) of trust including the ADSLITE endpoint certificate.
 # Max retries for failed submissions when not in debug mode
 cmrs_max_retries = 3
 
