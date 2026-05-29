@@ -10,6 +10,7 @@ import logging
 import csv
 import re
 import requests
+import html
 import time
 from jinja2 import Template
 from datetime import datetime, timedelta
@@ -40,7 +41,7 @@ def submit2Cmrs(xmlEnvelope: str) -> requests.Response:
             data=xmlEnvelope.encode("utf-8"),
             headers=headers,
             cert=(certFile, keyFile),
-            verify=caBundle,
+            verify=pkiTrust,
             timeout=60
         )
 
@@ -300,7 +301,7 @@ def process_row(row):
               <device:identifiers>
                 <device:FQDN>
                   {% if dnsName %}<device:host_name>{{ dnsName }}</device:host_name>{% endif %}
-                  {% if AD_User_DNS_Domain %}<device:realm>SIE.LOCATION.{{ AD_User_DNS_Domain }}</device:realm>{% endif %}
+                  {% if AD_User_DNS_Domain %}<device:realm>SITE.LOCATION.{{ AD_User_DNS_Domain }}</device:realm>{% endif %}
                 </device:FQDN>
               </device:identifiers>
               <device:configuration>
@@ -454,7 +455,8 @@ def process_row(row):
     # Clean and transform the record
     deviceRecord = {
         key.replace(".", "_").replace(" ", "_"): (
-            value.replace('\n', ' ').split('</', 1)[0]
+            # Wrap the existing cleaning logic in html.escape()
+            html.escape(value.replace('\n', ' ').split('</', 1)[0])
             if isinstance(value, str) and value != 'N/A' and value != 'None'
             else ""
         )

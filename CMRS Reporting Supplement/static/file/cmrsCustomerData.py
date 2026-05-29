@@ -4,8 +4,7 @@
 # c2cReportPath needs to be the full path to the reporting tool output file
 # This is by default /opt/splunk/etc/apps/cisco-catalyst-app/lookups/cisco_catalyst_analytics_reports.csv
 # For Linux Installations use
-# c2cReportPath = "/opt/splunk/etc/apps/cisco-catalyst-app/lookups/cisco_catalyst_analytics_reports.csv"
-c2cReportPath = "./cisco_catalyst_analytics_reports.csv"
+c2cReportPath = "/opt/splunk/etc/apps/cisco-catalyst-app/lookups/cisco_catalyst_analytics_reports.csv"
 # For Windows Installations use
 # c2cReportPath = "C:\\Program Files\\Splunk\\etc\\apps\\cisco-catalyst-app\\lookups\\cisco_catalyst_analytics_reports.csv"
 
@@ -35,10 +34,10 @@ reportingGeolocation = "12345"
 # API Connectivity and Security 
 # =========================================
 # Update the following to match the Endpoint and certificate data provided during your registration with CMRS
-soapEndpoint = "https://adslite.dev.cmrs.com:5000"    # DISA CMRS SOAP Endpoint
+soapEndpoint = "https://adslite.dev.cmrs.com"    # DISA CMRS SOAP Endpoint
 certFile = "client.crt"             # Path to your client certificate (PEM)
 keyFile = "client.key"              # Path to your private key (PEM)
-caBundle = "caBundle.crt"           # CA certificate to verify the server
+pkiTrust = "cmrsProvidedTrust.crt"  # Trusted CMRS certificate to verify the server. This should be a single file with the full chain (PEM encoded) of trust including the ADSLITE endpoint certificate.
 # Max retries for failed submissions when not in debug mode
 cmrs_max_retries = 3
 
