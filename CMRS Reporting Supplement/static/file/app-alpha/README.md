@@ -418,6 +418,7 @@ Likely issue with the Trust Bundle. Please ensure all public keys from server to
 | 1.0.0 | Unreleased | Initial build and testing. |
 | 1.0.3 | June 2026 | Initial UCC release. Replaces CLI-based submit2cmrs.py with Splunk web UI configuration. Features Test Connection button. |
 | 1.0.4 | June 2026 | Updated COAMS Normalization routine and README |
+| 1.0.5 | June 2026 | Access Level Normalization fix for Cisco Catalyst App v3.1 |
 
 ---
 
