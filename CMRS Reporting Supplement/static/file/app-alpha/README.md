@@ -93,10 +93,10 @@ The General tab contains core settings shared across all submission modes (onlin
 |---------|------|----------|-------------|---------|
 | **Publisher Version** | Text | **Yes** | Version of this reporting solution. Read-only, always 3.0.0. | `3.0.0` |
 | **Publisher Name** | Text | **Yes** | FQDN or unique identifier for your Splunk search head. Used in all CMRS submissions for identification. | `splunk-01.example.com` |
-| **Report Source CSV Path** | Text | **Yes** | Absolute path to the Cisco C2C endpoint CSV file. This file must be accessible by the `splunk` user. | `/opt/splunk/etc/apps/cisco-catalyst-app/lookups/cisco_catalyst_analytics_reports.csv` |
+| **Report Source CSV Path** | Text | **Yes** | Absolute path to the Cisco C2C endpoint CSV file. This file must be accessible by the `splunk` user. | The defaults are: Linux: `/opt/splunk/etc/apps/cisco-catalyst-app/lookups/cisco_catalyst_analytics_reports.csv` Windows:`C:\Program Files\Splunk\etc\apps\cisco-catalyst-app\lookups\cisco_catalyst_analytics_reports.csv` |
 | **Reporting Batch Size** | Number | **Yes** | Number of endpoints to include in each SOAP submission. **Recommended: 200** (theoretical maximum ~250 per submission). | `200` |
 | **ACAS Delta (Days)** | Number | **Yes** | Expected ACAS scan frequency in days. Endpoints not scanned within this window are marked as "Failed" for vulnerability compliance. | `7` |
-| **ISE Version** | Text | **Yes** | Version of your Cisco ISE deployment. Use the <MAJOR>.<MINOR>.<PATCH> standard | `3.4.3` is Cisco ISE Version 3.4.X - Patch 3 |
+| **ISE Version** | Text | **Yes** | Version of your Cisco ISE deployment. | Use the \<MAJOR\>.\<MINOR\>.\<PATCH\> standard: `3.4.3` is Cisco ISE Version 3.4.X - Patch 3 |
 | **ISE Serial** | Text | **Yes** | Serial number or unique deployment ID of your Cisco ISE. | `12345ABCDE` |
 
 ---
@@ -127,6 +127,7 @@ Configure mTLS authentication and DISA CMRS endpoint details for direct submissi
 ---
 
 #### Configuration → **Offline Submission**
+> **Note:** Only enable offline submission for validation or true offline networks where manual file reporting is required.
 
 ![Configuration - Offline Submission Tab](img/config-offline-submission.png)
 
@@ -134,7 +135,7 @@ Configure XML file generation for testing or manual submission without direct SO
 
 | Setting | Type | Required | Description | Example |
 |---------|------|----------|-------------|---------|
-| **Enable Offline Mode** | Toggle | No | When **True**, submissions are saved to XML files instead of sent to DISA. Use for testing and validation. | `False` |
+| **Enable Offline Mode** | Toggle | No | When **True**, submissions are saved to XML files instead of sent to DISA. Use for testing and validation or in closed networks where online submission is not possible. | `False` |
 | **Offline Report Base Name** | Text | Conditional | Output filename that will have datestamp added. Only used when Offline Mode is enabled. | `offlineReport.xml` |
 | **Offline Report Backup Count** | Integer | Conditional | How many previous runs, including current, to keep in the specified directory. | `5` |
 | **Output Directory** | Text | Conditional | Absolute path where offline XML files will be saved. Leave empty to use the app's `local` folder. Must be writable by the `splunk` user. | `/opt/splunk/etc/apps/submit2cmrs/local/` |
@@ -153,13 +154,13 @@ These DoD-assigned identifiers tag your compliance data in the CMRS system for p
 
 | Setting | Type | Required | Description | Example |
 |---------|------|----------|-------------|---------|
-| **Reporting Owning Organization** | Text | **Yes** | DoD-assigned ID for the owning organization. | `12345` |
-| **Reporting Admin Organization** | Text | **Yes** | DoD-assigned ID for the administering organization. | `12345` |
-| **Reporting CNDSP** | Text | **Yes** | Command and Control Naval Defense Strategy Program identifier. | `12345` |
+| **Reporting Owning Organization** | Text | **Yes** | DoD-assigned tag for the owning organization. | `12345` |
+| **Reporting Admin Organization** | Text | **Yes** | DoD-assigned tag for the administering organization. | `12345` |
+| **Reporting CNDSP** | Text | **Yes** | CNDSP (Computer Network Defense Service Provider) tag. | `12345` |
 | **Reporting Area of Operations (CCSAFA)** | Text | **Yes** | CCSAFA (Cyber Common Situational Awareness for Force Application) Area of Operations tag. | `12345` |
 | **Reporting Geographic AOR (COCOMAOR)** | Text | **Yes** | COCOMAOR (Combatant Command Area of Responsibility) geographic tag. | `12345` |
-| **Reporting Geolocation** | Text | **Yes** | DoD-assigned location ID for the reporting sensor. | `12345` |
-| **Reporting Operational Accreditation** | Text | **Yes** | Operational accreditation level or status. | `12345` |
+| **Reporting Geolocation** | Text | **Yes** | Geographical Location tag. | `12345` |
+| **Reporting Operational Accreditation** | Text | **Yes** | Operational accreditation tag. | `12345` |
 
 ---
 
@@ -414,6 +415,7 @@ Likely issue with the Trust Bundle. Please ensure all public keys from server to
 
 | Version | Release Date | Notes |
 |---------|--------------|-------|
+| 1.0.0 | Unreleased | Initial build and testing. |
 | 1.0.3 | June 2026 | Initial UCC release. Replaces CLI-based submit2cmrs.py with Splunk web UI configuration. Features Test Connection button. |
 
 ---
