@@ -12,10 +12,12 @@ Automate the submission of endpoint compliance data to the DISA Continuous Monit
   - [Installation](#installation)
     - [Prerequisites](#prerequisites)
     - [Deploy the Add-on](#deploy-the-add-on)
+    - [Search Head Cluster (Deployer) Setup](#search-head-cluster-deployer-setup)
   - [Configuration Overview](#configuration-overview)
     - [General Settings](#general-settings)
       - [Configuration → **General**](#configuration--general)
       - [Configuration → **Online Submission**](#configuration--online-submission)
+      - [Configuration → **Proxy**](#configuration--proxy)
       - [Configuration → **Offline Submission**](#configuration--offline-submission)
       - [Configuration → **COAMS Configuration**](#configuration--coams-configuration)
       - [Configuration → **Logging**](#configuration--logging)
@@ -75,6 +77,43 @@ Automate the submission of endpoint compliance data to the DISA Continuous Monit
 2. **Via CLI:**
    - Follow the default CLI installation method for your selected OS
 
+### Search Head Cluster (Deployer) Setup
+
+Use deployer-managed config files so settings and inputs are distributed to all SHC members without opening the UI on each node.
+
+1. From the installed app folder on deployer, create a `local` directory.
+Linux/macOS app path example: `/opt/splunk/etc/apps/submit2cmrs`
+Windows app path example: `C:\Program Files\Splunk\etc\apps\submit2cmrs`
+2. Copy template files from `deployer/` into `local/`.
+
+Linux/macOS:
+```bash
+mkdir -p local
+cp deployer/submit2cmrs_settings.conf.example local/submit2cmrs_settings.conf
+cp deployer/inputs.conf.example local/inputs.conf
+```
+Windows PowerShell:
+```powershell
+New-Item -ItemType Directory -Path .\local -Force | Out-Null
+Copy-Item .\deployer\submit2cmrs_settings.conf.example .\local\submit2cmrs_settings.conf
+Copy-Item .\deployer\inputs.conf.example .\local\inputs.conf
+```
+3. Edit `local/submit2cmrs_settings.conf` and `local/inputs.conf` with your environment values.
+4. Stage app content under deployer SHC bundle path (`$SPLUNK_HOME/etc/shcluster/apps/submit2cmrs`).
+5. Apply the SHC bundle from deployer.
+
+Linux/macOS:  
+`sudo /opt/splunk/bin/splunk apply shcluster-bundle -target https://<captain-mgmt-host>:8089 -auth <admin>:<password>`
+
+Windows PowerShell:  
+`& "$env:SPLUNK_HOME\bin\splunk.exe" apply shcluster-bundle -target https://<captain-mgmt-host>:8089 -auth <admin>:<password>`
+
+Notes:
+- Keep `local/submit2cmrs_settings.conf` and `local/inputs.conf` in the staged SHC app so all members receive the same configuration.
+- Templates are under `deployer/` and are intended to be copied into `local/`.
+- `default/server.conf` includes `conf_replication_include.submit2cmrs_settings = true`, so the settings conf is cluster-aware.
+- Input runtime is SHC-aware and only executes on captain (members skip), preventing duplicate runs per interval.
+
 ---
 
 ## Configuration Overview
@@ -114,6 +153,24 @@ Configure mTLS authentication and DISA CMRS endpoint details for direct submissi
 | **Client Private Key File** | File Upload | **Yes** | PEM-encoded mTLS private key. Must match the client certificate. | `client-key.pem` |
 | **Trust Bundle File** | File Upload | **Yes** | PEM-encoded CA + SOAP Identity certificate(s) for DISA server verification. Must include the full certificate chain (SOAP endpoint certificate, all intermediate CAs + Root CA). | `trust-bundle.pem` |
 
+The **Trust Bundle** should be single file, formatted as a chain of certificates starting with the Root CA, all subordinates, and last the ADSLITE public keys like the following:
+
+```bash
+-----BEGIN CERTIFICATE-----
+MIIEETCCAvmgAwIBAgIJAO0k6QUROwKjMA0GCSqGSIb3DQEBCwUAMIGeMQswCQYD
+...
+-----END CERTIFICATE-----
+-----BEGIN CERTIFICATE-----
+MIIEjTCCA3WgAwIBAgICIcgwDQYJKoZIhvcNAQENBQAwgZ4xCzAJBgNVBAYTAlVT
+...
+-----END CERTIFICATE-----
+-----BEGIN CERTIFICATE-----
+MQswCQYDVQQIDAJQQTEVMBMGA1UEBwwMQ2hhbWJlcnNidXJnMRAwDgYDVQQKDAdG
+...
+-----END CERTIFICATE-----
+```
+
+
 **Test Connection:**
 1. Fill in all required Online Submission fields
 2. Click **Save** - a connection test will run automatically after save completes
@@ -123,6 +180,24 @@ Configure mTLS authentication and DISA CMRS endpoint details for direct submissi
    - **[FAIL]** — See [Troubleshooting](#troubleshooting)
 
 > **Note:** This does not submit anything to CMRS. It simply validates that the mTLS connection will successfully establish trust between this server and the CMRS endpoint.
+
+---
+
+#### Configuration → **Proxy**
+
+Use this tab when CMRS submission must traverse an HTTP/SOCKS proxy.
+
+| Setting | Type | Required | Description | Example |
+|---------|------|----------|-------------|---------|
+| **Enable Proxy** | Toggle | No | Enables proxy routing for CMRS API submission calls. | `True` |
+| **Proxy URL** | Text | Conditional | Proxy endpoint including scheme and port. | `http://proxy.example.mil:8080` |
+| **Proxy Username** | Text | No | Optional username for authenticated proxy. | `svc_cmrs_proxy` |
+| **Proxy Password** | Text | No | Optional password for authenticated proxy. Stored encrypted in app settings. | `********` |
+
+Notes:
+- If **Enable Proxy** is true, **Proxy URL** must be set.
+- Supported URL schemes include `http`, `https`, and `socks5h`.
+- If username is set, the app injects encoded credentials into the proxy URL for outbound CMRS requests.
 
 ---
 
@@ -406,7 +481,7 @@ Likely issue with the Trust Bundle. Please ensure all public keys from server to
 
 ## Support & Documentation
 
-- **Cisco C2C Documentation:** https://www.cisco.com/c/en/us/solutions/comply-to-connect.html
+- **Cisco Splunk C2C Reporting Documentation and Software Repository:** https://github.com/PubSec-Security-DevNet/ciscoSplunkC2CReporting/tree/main
 - **Cisco C2C Support Email:** [cisco_c2c_support@external.cisco.com](mailto:cisco_c2c_support@external.cisco.com)
 
 ---
@@ -418,7 +493,8 @@ Likely issue with the Trust Bundle. Please ensure all public keys from server to
 | 1.0.0 | Unreleased | Initial build and testing. |
 | 1.0.3 | June 2026 | Initial UCC release. Replaces CLI-based submit2cmrs.py with Splunk web UI configuration. Features Test Connection button. |
 | 1.0.4 | June 2026 | Updated COAMS Normalization routine and README |
-| 1.0.5 | June 2026 | Access Level Normalization and Managed Device fix for Cisco Catalyst App v3.1 |
+| 1.0.5 | June 2026 | Access Level Normalization fix for Cisco Catalyst App v3.1 |
+| 1.0.6 | June 2026 | Added SHC captain-only modular input execution, proxy support (including authenticated proxy credentials), and bundled deployer bootstrap tooling/templates. |
 
 ---
 
