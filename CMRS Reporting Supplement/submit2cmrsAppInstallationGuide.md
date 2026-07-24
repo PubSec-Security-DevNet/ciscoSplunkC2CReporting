@@ -57,9 +57,11 @@ Automate the submission of endpoint compliance data to the DISA Continuous Monit
 
 ## Installation
 
+Application Package: [submit2cmrs app](static/file/submit2cmrs-1.0.6.tar.gz)
+
 ### Prerequisites
 
-- Splunk 9.0 or later
+- Splunk 9.4 or later
 - mTLS client certificate (PEM format)
 - mTLS private key (PEM format)  
 - CA trust bundle (PEM format) for DISA CMRS endpoint verification
@@ -124,7 +126,7 @@ The Configuration tab has 6 sections. **All fields marked with `*` are required*
 
 #### Configuration → **General**
 
-![Configuration - General Tab](img/config-general.png)
+![Configuration - General Tab](static/img/config-general.png)
 
 The General tab contains core settings shared across all submission modes (online and offline).
 
@@ -142,7 +144,7 @@ The General tab contains core settings shared across all submission modes (onlin
 
 #### Configuration → **Online Submission**
 
-![Configuration - Online Submission Tab](img/config-online-submission.png)
+![Configuration - Online Submission Tab](static/img/config-online-submission.png)
 
 Configure mTLS authentication and DISA CMRS endpoint details for direct submissions.
 
@@ -204,7 +206,7 @@ Notes:
 #### Configuration → **Offline Submission**
 > **Note:** Only enable offline submission for validation or true offline networks where manual file reporting is required.
 
-![Configuration - Offline Submission Tab](img/config-offline-submission.png)
+![Configuration - Offline Submission Tab](static/img/config-offline-submission.png)
 
 Configure XML file generation for testing or manual submission without direct SOAP connectivity.
 
@@ -258,7 +260,7 @@ Control the verbosity of add-on logs for debugging and monitoring.
 
 #### Configuration → **Advanced**
 
-![Configuration - Advanced Tab](img/config-advanced.png)
+![Configuration - Advanced Tab](static/img/config-advanced.png)
 
 Fine-tuning options for logging, debug mode, parallel processing, and compliance rule mapping.
 
@@ -310,7 +312,7 @@ These fields map your CSV column names to C2C compliance rules. **Only modify if
 
 **Tab:** Inputs → **Create New Input**
 
-![Inputs Page](img/inputs-page.png)
+![Inputs Page](static/img/inputs-page.png)
 
 1. Navigate to the **Inputs** tab in the Submit2CMRS app
 2. Click **Create New Input**
@@ -494,7 +496,7 @@ Likely issue with the Trust Bundle. Please ensure all public keys from server to
 | 1.0.3 | June 2026 | Initial UCC release. Replaces CLI-based submit2cmrs.py with Splunk web UI configuration. Features Test Connection button. |
 | 1.0.4 | June 2026 | Updated COAMS Normalization routine and README |
 | 1.0.5 | June 2026 | Access Level Normalization fix for Cisco Catalyst App v3.1 |
-| 1.0.6 | June 2026 | Added SHC captain-only modular input execution, proxy support (including authenticated proxy credentials), and bundled deployer bootstrap tooling/templates. |
+| 1.0.6 | July 2026 | Added SHC captain-only modular input execution, proxy support (including authenticated proxy credentials), and bundled deployer bootstrap tooling/templates. |
 
 ---
 

@@ -1,4 +1,4 @@
-# Comply to Connect Reporting with the Cisco Enterprise Networking for Splunk Platform App
+# Comply to Connect Reporting with the Cisco Enterprise Networking for Splunk Platform App - Version 3.2
 ### Executive Summary
 
 **Comply to Connect (C2C)** is a critical program, especially for the Department of Defense (DoD), serving as a bridge to Zero Trust access. It automates the process of controlling which devices are allowed to authenticate and connect to the DoD Information Network (DoDIN). C2C ensures that devices are automatically remediated if found non-compliant and provides comprehensive reporting and visibility throughout the process. This program lays the groundwork for Zero Trust by establishing inventory and endpoint health as foundational elements, enabling consistent policy enforcement and behavior attribution to users and devices.
@@ -25,7 +25,7 @@ Monitoring and reporting are essential components of both Comply to Connect and 
 By integrating monitoring and reporting, organizations can ensure that trust is continuously verified, risks are minimized, and security policies are enforced consistently across all network access points, which is fundamental to the effectiveness of Zero Trust security. Splunk is a critical component in supporting Comply to Connect (C2C) and Zero Trust frameworks by delivering comprehensive monitoring and reporting capabilities. It provides continuous visibility across users, devices, and infrastructure, enabling real-time verification of security posture and compliance. By integrating data from diverse sources, Splunk offers advanced analytics and machine learning to detect anomalies and prioritize responses effectively. Its automation and orchestration features reduce manual effort and accelerate incident handling, ensuring enforcement of zero trust policies. Additionally, Splunk’s customizable reporting supports regulatory compliance requirements such as FedRAMP and DoD mandates. With scalable deployment options across on-premises and cloud environments, Splunk enhances security operations by empowering teams to maintain continuous trust and resilience within Zero Trust architectures. Together, Cisco and Splunk deliver the visibility, analytics, and automation essential for effective monitoring and reporting in C2C and Zero Trust implementations.  
 
 ---
-- [Comply to Connect Reporting with the Cisco Enterprise Networking for Splunk Platform App](#comply-to-connect-reporting-with-the-cisco-enterprise-networking-for-splunk-platform-app)
+- [Comply to Connect Reporting with the Cisco Enterprise Networking for Splunk Platform App - Version 3.2](#comply-to-connect-reporting-with-the-cisco-enterprise-networking-for-splunk-platform-app---version-32)
     - [Executive Summary](#executive-summary)
     - [Importance of Monitoring and Reporting](#importance-of-monitoring-and-reporting)
 - [Prerequisites](#prerequisites)
@@ -33,8 +33,6 @@ By integrating monitoring and reporting, organizations can ensure that trust is 
 - [Splunk Cisco Enterprise Networking Application and Technical Add-Ons Installation](#splunk-cisco-enterprise-networking-application-and-technical-add-ons-installation)
     - [Download App and TAs](#download-app-and-tas)
     - [Install Reporting App and TAs on Splunk Server](#install-reporting-app-and-tas-on-splunk-server)
-    - [Add props.conf for Syslog Truncate](#add-propsconf-for-syslog-truncate)
-      - [Create a local **props.conf** in the **local** directory and add following stanza:](#create-a-local-propsconf-in-the-local-directory-and-add-following-stanza)
 - [Cisco Identity Services Engine Configuration](#cisco-identity-services-engine-configuration)
     - [Configure ISE Syslog](#configure-ise-syslog)
     - [Configure ISE Repositories](#configure-ise-repositories)
@@ -67,7 +65,8 @@ By integrating monitoring and reporting, organizations can ensure that trust is 
     - [Reporting \& Metadata Macros](#reporting--metadata-macros)
     - [Access Level Mapping Macros](#access-level-mapping-macros)
       - [cisco\_catalyst\_access\_level\_full](#cisco_catalyst_access_level_full)
-      - [cisco\_catalyst\_access\_level\_remediation](#cisco_catalyst_access_level_remediation)
+      - [cisco\_catalyst\_access\_level\_limited](#cisco_catalyst_access_level_limited)
+      - [cisco\_catalyst\_access\_level\_deny](#cisco_catalyst_access_level_deny)
     - [Tenable Plugin Macros](#tenable-plugin-macros)
 - [Cisco ISE Network Device Groups Lattitude and Longitude Mapping](#cisco-ise-network-device-groups-lattitude-and-longitude-mapping)
 - [Cisco Enterprise Networking for Splunk Platform App](#cisco-enterprise-networking-for-splunk-platform-app)
@@ -83,8 +82,7 @@ By integrating monitoring and reporting, organizations can ensure that trust is 
     - [Step 4 - ICAM Summary](#step-4---icam-summary)
     - [Implementation Metrics](#implementation-metrics)
 - [Required for endpoints over 10,000 Endpoints](#required-for-endpoints-over-10000-endpoints)
-    - [Modify cisco\_catalyst\_reports\_lookup Using "sort 0"](#modify-cisco_catalyst_reports_lookup-using-sort-0)
-    - [Editing App Specific limits.conf for subsearches](#editing-app-specific-limitsconf-for-subsearches)
+    - [Modify cisco\_catalyst\_kv\_view Using "sort 0"](#modify-cisco_catalyst_kv_view-using-sort-0)
 - [Change Navigation to only show Comply to Connect (C2C) Views - Optional](#change-navigation-to-only-show-comply-to-connect-c2c-views---optional)
     - [Create the local UI Navigation folder structure.](#create-the-local-ui-navigation-folder-structure)
     - [Copy the current default.xml from default to local](#copy-the-current-defaultxml-from-default-to-local)
@@ -102,7 +100,7 @@ By integrating monitoring and reporting, organizations can ensure that trust is 
       - [Step 4: Access Control](#step-4-access-control)
     - [Master Endpoint Record Aggregator \& Implementation Scoring](#master-endpoint-record-aggregator--implementation-scoring)
       - [Master Aggregator Report](#master-aggregator-report)
-      - [Implementation Metrics](#implementation-metrics-1)
+      - [Master Endpoint Record Report and Output for CMRS reporting add-on](#master-endpoint-record-report-and-output-for-cmrs-reporting-add-on)
   - [SyslogNG Configuration for ISE Syslog over 8192 bytes](#syslogng-configuration-for-ise-syslog-over-8192-bytes)
     - [Check \& Set SELINUX Permissions. Use TCP or UDP example based on desired output from ISE.](#check--set-selinux-permissions-use-tcp-or-udp-example-based-on-desired-output-from-ise)
     - [Create Directory for ISE Logs in /var/log](#create-directory-for-ise-logs-in-varlog)
@@ -116,6 +114,7 @@ This document assumes that following is already scoped/sized and installed in th
   * Cisco Identity Services Engine (ISE)
     * w/ Analytics Token Applied/Enabled
   * Splunk Enterprise
+  * Remote SFTP Repository reachable by ISE and Splunk
 * Optional 
   * Cisco Catalyst Center
   * Tenable Security Center
@@ -148,15 +147,6 @@ Tenable Add-On for Splunk - Optional
 Open a web browser and go to http://<IP|Hostname>:8000  
 Navigate to Apps > Manage Apps  
 Click **"Install App From File"** on the top right, select the downloaded app bundle and click **Upload**  
-
-### Add props.conf for Syslog Truncate
-Some ISE Syslog messages are over the Splunk default 10,000 byte length. Therefore the Truncate length must be set to 20,000 to ensure that logs are not truncated before all the data elements are indexed.   
-#### Create a local **props.conf** in the **local** directory and add following stanza:  
-`vi /opt/splunk/etc/apps/cisco-catalyst-app/local/props.conf`
-```
-[cisco:ise:syslog]
-TRUNCATE = 20000
-```
 
 ---
 
@@ -367,7 +357,7 @@ Navigate to the **"Inputs"** tab and select the **"ISE Analytics Reports"** inpu
 * **Cisco ISE Disk Repository Name:** \<Local Disk Repo Name\>
 * **Cisco ISE SFTP Repository Name:** \<SFTP Repo Name\>
 * **Repository Path:** \<Path with trailing slash\>
-Note: In most cases the Repository Path will match the path configured in ISE.  
+Note: In most cases the Repository Path will match the path configured in ISE.  Ensure that a trailing "/" is on the repository path.
 
 ![ISE Input Configuration](static/img/iseAnalyticsInput.png)
 
@@ -453,7 +443,7 @@ In the Cisco Catalyst App, the macros generally fall into three functional types
     *   **How to Modify**: By default, it searches all indexes (`*`). **For better performance and security, change this to specific indexes.**
         *   *Example*: Definition = index IN ("ise_syslog","ise_analytics","catalyst_center","tenable")
     ![Splunk Reporting App Index Macro](static/img/splunkAppIndex.png)  
-*   **`cisco_catalyst_app_sourcetypes` Optional**
+*   **`cisco_catalyst_app_sourcetypes` Leave at Default**
     *   **Purpose**: Filters searches to only include specific sourcetypes related to the Cisco ecosystem and Tenable.
     *   **Used In**: Generally used in all searches or dashboards to narrow down the dataset to relevant sourcetypes.
     *   **How to Modify**: If using a custom sourcetype for data inputs (e.g., `cisco:ise:custom`), add it to the list.
@@ -472,15 +462,30 @@ In the Cisco Catalyst App, the macros generally fall into three functional types
 These macros use Regular Expressions to parse the results of security checks from raw ISE syslog messages in MESSAGE_CODE 87000 & 87001.
 
 *   **Macros**: 
-    * `cisco_catalyst_posture_regex_encrypt`
-    * `cisco_catalyst_posture_regex_firewall`
-    * `cisco_catalyst_posture_regex_malware`
-    * `cisco_catalyst_posture_regex_patch`
-    * `cisco_catalyst_posture_regex_USB`
-*   **Used In**: `cisco_catalyst_ise_posture_report_v2`.
+    * `cisco_catalyst_posture_ruleResultEncrypt`
+    * `cisco_catalyst_posture_ruleResultFirewall`
+    * `cisco_catalyst_posture_ruleResultPatch`
+    * `cisco_catalyst_posture_ruleResultUSB`
+    * `cisco_catalyst_posture_ruleResultEndpointApp`
+    * `cisco_catalyst_posture_ruleResultPKIRoots`
+    * `cisco_catalyst_posture_ruleResultEndpointMonitor`
+    * `cisco_catalyst_posture_ruleResultPatching`
+    * `cisco_catalyst_posture_ruleResultMalware`
+    * `cisco_catalyst_posture_ruleResultOwnorg`
+    * `cisco_catalyst_posture_ruleResultAdminorg`
+    * `cisco_catalyst_posture_ruleResultCcsafa`
+    * `cisco_catalyst_posture_ruleResultCndsp`
+    * `cisco_catalyst_posture_ruleResultCocomaor`
+    * `cisco_catalyst_posture_ruleResultGeolocation`
+    * `cisco_catalyst_posture_ruleResultOpAccreditation`
+*   **Used In**: `cisco_catalyst_ise_posture_report`.
 *   **How to Modify**: These depend on the naming convention of the Posture Policies in Cisco ISE and assume that multiple `PostureReport` values come in from Syslog, 1 for each Macro. If the policies are named `CORP_Antivirus` instead of `C2C_AntiMalware`, the regex must be updated. It is recommended to Not change the extracted variable name enclosed in the `(?<>)`
-    *   *Example*: `definition = "CORP_Antivirus_\w+_Policy\\\;(?<C2CMalwareResult>[\w]*)"`
-    *   In the case that your checks/conditions are nested inside of a single `PostureReport` key like the below the Regex may look more like `C2CR-WIN-AM:\w+:(?<C2CMalwareResult>w+)`
+    *   *Example*: 
+        *   Using Search look at a raw posture log using `index=<syslog_index> MESSAGE_CODE=87000` and look for the PostureReport elements.
+            ![Message Code 87000 example](static/img/messageCode87000.png)
+        *   The Posture Macros expect to Regex conditions. One for matching the name of the posture policy, the other for extracting the result (Passed/Failed).
+        *   To match the example of C2C_Encrypt_Win_Policy we would update the definition = `"C2C_Encrypt_\w+_Policy=(?<ruleResultEncrypt>[\w]*)"`
+            *   The `C2C_Encrypt_\w+_Policy` matches any policy name that starts with C2C_Encrypt_\<any word value\>_Policy and the Passed/Failed result is stored in the app as `ruleResultEncrypt` variable for later use in the reports. 
 
 ---
 
@@ -489,9 +494,7 @@ These macros use Regular Expressions to parse the results of security checks fro
 #### cisco_catalyst_CYBERCOM_Macro
 *   **Purpose**: Defines the list of official device categories.
 *   **Used In**: 
-    * `cisco_catalyst_profiler_summary_v4`
-    * `ImplementationStep1Metric2`
-    * `cisco_catalyst_010_reporting_uscybercom_device_category_step_1`.
+    * `cisco_catalyst_profiler_summary`
 *   **How to Modify**: Add or remove categories to match the organization's specific device classification standards. Ensure that no spaces are on the leading or trailing of each Logical Profile in the definition.
     *   *Example*: Definition = "(Workstations|Servers|Printers|Medical Devices)"
 ![CYBERCOM Logical Profile Macro](static/img/cybercomMacro.png)
@@ -499,23 +502,21 @@ These macros use Regular Expressions to parse the results of security checks fro
 #### cisco_catalyst_CYBERCOM_Unknown
 *   **Purpose**: The fallback label for devices that haven't been profiled.
 *   **Used In**: 
-    * `cisco_catalyst_profiler_summary_v4`
-    * `ImplementationStep1Metric2`.
+    * `cisco_catalyst_profiler_summary`
 *   **How to Modify**: Change the string if a different label like "Unclassified" or "Pending".
 
 ---
 
 ### Reporting & Metadata Macros
-These macros provide the "Header" information for compliance reports.
+These macros provide additional matching value information for compliance reports.
 
 *   **Macros**: 
-    * `cisco_catalyst_reporting_owner`
-    * `cisco_catalyst_reporting_AO`
-    * `cisco_catalyst_reporting_deployment_id`.
-*   **Used In**: `cisco_catalyst_report_all_step_2`.
-*   **How to Modify**: These **must** be changed for every installation.
-    *   *Example*: Change `Example Owner` to `Department of Transportation`.
-    *   *Example*: Change `B9EJMA12345` to the actual site deployment ID (Commonly Primary Admin Node ISE Serial Number).
+    * `cisco_catalyst_access_level_deny`
+    * `cisco_catalyst_manageable_logical_filter`
+    * `cisco_catalyst_manageable_profile_filter`
+*   **Used In**: ``
+*   **How to Modify**: These **must** be changed for every installation to match the names of the Authorization Policies, Logical Profiles, and Device Profiles for your environment.
+
 
 ---
 
@@ -523,17 +524,24 @@ These macros provide the "Header" information for compliance reports.
 
 #### cisco_catalyst_access_level_full
 *   **Purpose**: Defines the string used in ISE Authorization Policies to indicate a device has full network access.
-*   **Used In**: `cisco_catalyst_step_4_authentication_details`.
-*   **How to Modify**: Change this to match the specific "Result" name in ISE.
-    *   *Example1*: Definition = "PermitAccess"
-    *   *Example2*: If multiple Authorzation Policies indicate full network access, Definition = "(PermitAccess|Compliant|*etc*)"
+*   **Used In**: ``
+*   **How to Modify**: Change this to match Authorization Profile names in ISE. It can be a partial or full match. Entries in the macro MUST be lower case only.
+    *   *Example1*: Definition = "permitaccess"
+    *   *Example2*: If multiple Authorzation Policies indicate full network access, Definition = "(permitaccess|compliant|fullaccess|*etc*)"
 
-#### cisco_catalyst_access_level_remediation
+#### cisco_catalyst_access_level_limited
 *   **Purpose**: Defines the string used in ISE Authorization Policies to indicate a device has limited network access
-*   **Used In**: `cisco_catalyst_step_4_authentication_details`.
-*   **How to Modify**: Change this to match the ISE Authorization Profile name for restricted access.
-    *   *Example1*: Definition = "Quarantine"
-    *   *Example2*: If multiple Authorzation Policies indicate limited network access, Definition = "(Quarantine|Remediation|Limited|*etc*)"
+*   **Used In**: ``
+*   **How to Modify**: Change this to match Authorization Profile names in ISE. It can be a partial or full match. Entries in the macro MUST be lower case only.
+    *   *Example1*: Definition = "limited"
+    *   *Example2*: If multiple Authorzation Policies indicate limited network access, Definition = "(posture|quarantine|remediation|limited|*etc*)"
+
+#### cisco_catalyst_access_level_deny
+*   **Purpose**: Defines the string used in ISE Authorization Policies to indicate a device has been denied network access
+*   **Used In**: ``
+*   **How to Modify**: Change this to match Authorization Profile names in ISE. It can be a partial or full match. Entries in the macro MUST be lower case only.
+    *   *Example1*: Definition = "deny"
+    *   *Example2*: If multiple Authorzation Policies indicate limited network access, Definition = "(deny|denied|*etc*)"
 
 ---
 
@@ -625,49 +633,19 @@ This view provides KPI metrics based on the C2C program office Goals and Calcula
 # Required for endpoints over 10,000 Endpoints
 In the event that the evironment for Analytics reporting exceeds 10,000 endpoints this will encounter a default limit on Splunk which limits Search results to 10,000 records.  
 
-### Modify cisco_catalyst_reports_lookup Using "sort 0"
-Adding a "sort 0" to the time sorting on the Master Search named `cisco_catalyst_reports_lookup` can override the default limits.  
+### Modify cisco_catalyst_kv_view Using "sort 0"
+Adding a "sort 0" to the time sorting on the Master Search named `cisco_catalyst_kv_view` can override the default limits.  
 * Navigate to *Settings > Searches, reports, and alerts*  
 * Select App: *Cisco Enterprise Networking for Splunk Platform(cisco-catalyst-app)*
 * Select Owner: *All*
 * Filter for, or locate the *cisco_catalyst_reports_lookup* report
 * Click *Edit* and *Edit Search*
-* Scroll to bottom of search and add a **0 (Zero Digit)** between the *sort* and *_time* command like the example below
+* Scroll to bottom of search and add a **0 (Zero Digit)** between the *sort* and *data_quality_score* command like the example below
 ```
-…  
-| sort 0 _time  
-| outputlookup cisco_catalyst_analytics_reports.csv create_empty=f  
+...  
+| sort 0 - data_quality_score  
+...  
 ```
-
-### Editing App Specific limits.conf for subsearches
-To increase the Splunk subsearch row limit over the default of 50,000, create/update the settings in an application specific limits.conf. Create or edit limits.conf in `$SPLUNK_HOME/etc/apps/cisco-catalyst-app/local/` and set the stanzas using the following examples (time, mb, and rows should match or slightly exceed your device count).  
- 
- Example with defaults:
-```
-[join]
-subsearch_maxtime = 60
-subsearch_maxout = 50000
-
-[stats]
-maxresultrows = 50000
-
-[mvexpand]
-max_mem_usage_mb = 500
-```
-
-Example for 200,000 endpoint environment:  
-```
-[join]
-subsearch_maxtime = 300
-subsearch_maxout = 201000
-
-[stats]
-maxresultrows = 201000
-
-[mvexpand]
-max_mem_usage_mb = 1000
-```
-Restart Splunk after making this change. 
 
 ---
 
@@ -710,142 +688,197 @@ Once the process completes reload browser where the App is loaded and the nav st
 
 # APPENDIX
 ## Reports / Saved Searches
+
+> **v3.2 Saved Search Timing and KV Store Pipeline**
+>
+> Version 3.2 uses a staged pipeline model. Core ISE/Tenable enrichment saved searches write intermediate results to `stage_*.csv` lookups on a frequent schedule (primarily every 15 minutes), and `cisco_catalyst_kv_update` runs every 10 minutes at minute offsets `3,13,23,33,43,53` to upsert the latest endpoint record into the KV Store (`cisco_catalyst_assets_lookup`).
+>
+> Not all searches run every 15 minutes. Some support searches run hourly, every 8 hours, daily, or every 24 hours (for example, location/SD-WAN/Meraki mapping and the assets reaper).
+
 ### Lookup Builders & Discovery
 
-*   **`cisco_catalyst_all_macAddresses`**
-    *   **Description**: The "Master Discovery" search that identifies every unique device.
-    *   **Key Commands**: 
-        * `eval/coalesce` (merges MACs from ISE Analytics Reports, Tenable, and Syslog)
-        * `replace/upper` (standardizes MAC format to `XX:XX:XX...`)
-    *   **Tuning**: If you add a new data source (e.g., a third-party CMDB), you must add an `append` block here to ensure those devices are included in the master inventory.
+*   **`cisco_catalyst_location`**
+    *   **Description**: Builds and refreshes the ISE location lookup template used for Network Device Group mapping.
+    *   **Key Commands**:
+        * `tstats` (collects authentication and device event locations)
+        * `coalesce/append/outputlookup` (normalizes and preserves historical location values)
+    *   **Tuning**: If location values are missing in reports, verify both authentication and device-location fields are populated in the datamodel.
+*   **`cisco_catalyst_sdwan_netflow`**
+    *   **Description**: Populates SD-WAN application tag lookup mappings.
+    *   **Key Commands**:
+        * `tstats` (pulls app + app_tag pairs)
+        * `outputlookup append=true` (incrementally updates tag mapping)
+*   **`cisco_catalyst_sdwan_policy`**
+    *   **Description**: Populates SD-WAN policy and policy-rule lookup mappings.
+    *   **Key Commands**:
+        * `append` (combines firewall policy and class-ID sources)
+        * `outputlookup key_field=key` (stores reusable policy map)
+*   **`cisco_catalyst_meraki_organization_mapping`**
+    *   **Description**: Maintains Meraki organization ID-to-name lookup values.
+    *   **Key Commands**:
+        * `tstats` (extracts organization identifiers from Meraki events)
+        * `table/outputlookup` (writes normalized lookup rows)
+*   **`cisco_catalyst_meraki_devices_serial_mapping`**
+    *   **Description**: Maintains Meraki sensor serial-to-name/model lookup values.
+    *   **Key Commands**:
+        * `rename/table/dedup` (normalizes serial metadata)
+        * `outputlookup` (publishes serial mapping CSV)
 
 ---
 
 ### ISE Analytics and Syslog Reports
 
-*   **`cisco_catalyst_ise_passed_authn_v3`**
-    *   **Description**: Captures successful authentication events.
-    *   **Key Commands**: 
-            * `rex` (extracts MACs from `cisco_av_pair`)
-            * `coalesce` (prioritizes endpoint MAC over VPN MAC)
-    *   **Tuning**: If you use a custom RADIUS attribute for MAC addresses, update the `rex` field to point to that attribute.
-*   **`cisco_catalyst_ise_hardware_report_v1`**
-    *   **Description**: Pulls physical hardware specs from ISE reports.
-    *   **Key Commands**: 
-            * `eval` (e.g., `memorysize*1024` to normalize units)
-            * `round` (formats disk space strings)
-*   **`cisco_catalyst_profiler_summary_v4`**
-    *   **Description**: Categorizes devices into CYBERCOM buckets based on ISE profiles.
-    *   **Key Commands**: 
-            * `makemv` (handles multi-value profiles)
-            * `mvfilter` (filters using macro to show only relevant logical profiles)
-    *   **Tuning**: If devices are showing as "Unknown," verify that the ISE Logical Profile names are included in the `cisco_catalyst_CYBERCOM_Macro`.
-*   **`cisco_catalyst_ise_accounting_v2`**
-    *   **Description**: Maps MAC addresses to current IP addresses.
-    *   **Key Commands**: 
-            * `replace` (normalizes MAC format)
-*   **`cisco_catalyst_ise_posture_report_v2`**
-    *   **Description**: Parses raw posture messages for security compliance.
-    *   **Key Commands**: 
-            * `rex` (uses 5 posture macros to extract results)
-    *   **Tuning**: If posture results are missing, check if your ISE syslog message codes match `87000` or `87001`.
-*   **`cisco_catalyst_coams_by_device`**
-    *   **Description**: Extracts DoD-specific organizational tags.
-    *   **Key Commands**: 
-            * `rex` (extracts numeric IDs from display names)
-            * `ltrim` (removes leading zeros)
+*   **`cisco_catalyst_profiler_summary`**
+    *   **Description**: Builds endpoint identity/profile context from ISE Full Reports and stages it for aggregation.
+    *   **Key Commands**:
+        * `makemv/mvfilter` (normalizes multi-value CYBERCOM categories)
+        * `strftime/strptime` (converts ISE timestamps to ISO format)
+        * `outputlookup stage_cisco_ise_profiler_summary.csv`
+*   **`cisco_catalyst_ise_passed_authn`**
+    *   **Description**: Stages passed authentication attributes including auth source, auth method, ICAM, and access assignment.
+    *   **Key Commands**:
+        * `rex` (extracts VPN MAC and auth context from `av_pair`)
+        * `case` (derives user-friendly auth/access fields)
+        * `outputlookup stage_cisco_ise_passed_authn.csv`
+*   **`cisco_catalyst_ise_accounting`**
+    *   **Description**: Stages IP addressing and connection counters from ISE accounting events.
+    *   **Key Commands**:
+        * `rex` (extracts accounting event timestamp)
+        * `eval` (derives wired/wireless/VPN counts)
+        * `outputlookup stage_cisco_ise_accounting.csv`
+*   **`cisco_catalyst_ise_access_levels`**
+    *   **Description**: Stages per-endpoint full/limited/unknown access counts based on authorization policy matching.
+    *   **Key Commands**:
+        * `chart/addtotals` (rolls up access-level totals)
+        * `foreach` (applies macro-based access classification)
+        * `outputlookup stage_cisco_ise_access_levels.csv`
+*   **`cisco_catalyst_ise_posture_report`**
+    *   **Description**: Stages endpoint posture status and rule extraction results from posture tuples.
+    *   **Key Commands**:
+        * `mvexpand/rex` (parses posture tuple content into rule result fields)
+        * `stats latest(...)` (reassembles most recent endpoint state)
+        * `outputlookup stage_cisco_ise_posture.csv`
+*   **`cisco_catalyst_ise_manageability`**
+    *   **Description**: Derives a managed/managable/unmanagable state from identity, auth, and posture context.
+    *   **Key Commands**:
+        * `inputlookup` (uses aggregated endpoint record)
+        * `case` (computes manageability label)
+        * `outputlookup stage_cisco_ise_manageability.csv`
+*   **`cisco_catalyst_ise_posture_remediation`**
+    *   **Description**: Stages posture remediation attempt summaries by endpoint, policy, and requirement.
+    *   **Key Commands**:
+        * `stats` (builds first/last seen and remediation counts)
+        * `mvjoin` (creates compact remediation summary string)
+        * `outputlookup stage_cisco_ise_posture_remediation.csv`
+*   **`cisco_catalyst_ise_hardware_report`**
+    *   **Description**: Stages ISE hardware inventory attributes (memory, disk, BIOS, CPU).
+    *   **Key Commands**:
+        * `eval` (normalizes memory/disk units)
+        * `fields` (publishes standardized hardware keys)
+        * `outputlookup stage_cisco_ise_hardware.csv`
+*   **`cisco_catalyst_coams_report`**
+    *   **Description**: Stages DoD COAMS/organizational attributes from ISE registry reports.
+    *   **Key Commands**:
+        * `rex/ltrim` (extracts and normalizes numeric org attributes)
+        * `outputlookup stage_cisco_ise_device_coams.csv`
 
 ---
 
 ### Tenable Asset Intelligence (Windows & Other)
 
-These searches (14 total) use `tstats` to query the Tenable datamodel and `rex` to parse the `plugin_text` field.
+These searches use `tstats` against Tenable datamodel events and normalize output into staged lookup files for endpoint aggregation.
 
-*   **Windows Searches**: 
-    * **`cisco_catalyst_windows_os_details_v2`**: Extracts Windows OS name, version, vendor, and architecture from Tenable plugin text.
-    * **`cisco_catalyst_windows_disk_details_v2`**: Extracts total and free disk space for Windows endpoints.
-    * **`cisco_catalyst_windows_hardware_details_v2`**: Extracts BIOS GUID, Vendor, Product, and Serial Number for Windows machines.
-    * **`cisco_catalyst_windows_interface_details_v2`**: Extracts NIC (Network Card) manufacturer and product names.
-    * **`cisco_catalyst_windows_memory_details_v2`**: Extracts total physical memory (RAM) and converts it to MB.
-    * **`cisco_catalyst_windows_processors_details_v2`**: Extracts CPU version, count, and core counts.
-    * **`cisco_catalyst_tpm_details_v2`**: Specifically parses Tenable data for TPM (Trusted Platform Module) versions and manufacturers.
-
-*   **Other (Linux/Network) Searches**: 
-    * **`cisco_catalyst_other_os_details_v2`**: Extracts OS vendor, version, and platform names for Linux/Unix/Other systems.
-    * **`cisco_catalyst_other_arch_details_v2`**: Extracts kernel version and hardware architecture for non-Windows systems.
-    * **`cisco_catalyst_other_disk_details_v2`**: Parses filesystem tables to find total and free disk space on non-Windows systems.
-    * **`cisco_catalyst_other_hardware_details_v2`**: Extracts BIOS/System info (Vendor, Product, Serial, UUID) for non-Windows systems.
-    * **`cisco_catalyst_other_interface_details_v2`**: Extracts NIC vendor and product info for non-Windows systems.
-    * **`cisco_catalyst_other_memory_details_v2`**: Extracts total physical memory for non-Windows systems.
-    * **`cisco_catalyst_other_processor_details_v2`**: Extracts CPU version and core counts for non-Windows systems.
-*   **Key Commands**:
-    *   `rex field=pluginText`: Used to extract specific strings (e.g., "Architecture:", "Kernel:", "UUID:").
-    *   `eval`: Used to normalize units (e.g., converting bytes to GB).
-*   **Tuning**: If Tenable updates their plugin output format, the `rex` patterns in these searches must be updated to match the new text structure.
+*   **`cisco_catalyst_tenable_osarch_details`**
+    *   **Description**: Extracts OS identity and architecture for Windows and Other platforms into a unified schema.
+    *   **Key Commands**:
+        * `case` (switches plugin parsing mode by plugin ID)
+        * `rex` (parses vendor, version, CPE, architecture, release)
+        * `outputlookup stage_tenable_osarch_detail.csv`
+*   **`cisco_catalyst_tenable_disk_details`**
+    *   **Description**: Extracts and normalizes boot partition size/free values for Windows and Other systems.
+    *   **Key Commands**:
+        * `rex` (extracts Windows and Other disk text formats)
+        * `case/coalesce` (normalizes unit conversions and common fields)
+        * `outputlookup stage_tenable_disk_detail.csv`
+*   **`cisco_catalyst_tenable_hardware_details`**
+    *   **Description**: Extracts BIOS/system inventory details (GUID, vendor, product, version, serial).
+    *   **Key Commands**:
+        * `rex` (platform-specific hardware extraction)
+        * `outputlookup stage_tenable_system_detail.csv`
+*   **`cisco_catalyst_tenable_interface_details`**
+    *   **Description**: Extracts NIC vendor and product names from Windows and Other interface plugins.
+    *   **Key Commands**:
+        * `rex max_match=0` (captures multiple NIC values)
+        * `outputlookup stage_tenable_interface_detail.csv`
+*   **`cisco_catalyst_tenable_memory_details`**
+    *   **Description**: Extracts and normalizes total physical memory values.
+    *   **Key Commands**:
+        * `rex` (parses source-specific memory values)
+        * `eval TotalPhysicalMemory=...*1024`
+        * `outputlookup stage_tenable_memory_detail.csv`
+*   **`cisco_catalyst_tenable_processors_detail`**
+    *   **Description**: Extracts CPU version, installed CPU count, and total core count.
+    *   **Key Commands**:
+        * `rex max_match=0` (captures all CPU/core occurrences)
+        * `mvcount/eventstats` (computes installed CPU and total cores)
+        * `outputlookup stage_tenable_processor_detail.csv`
+*   **`cisco_catalyst_tenable_tpm`**
+    *   **Description**: Extracts TPM manufacturer and version details from Windows TPM plugin output.
+    *   **Key Commands**:
+        * `rex` (extracts TPM fields)
+        * `outputlookup stage_tenable_tpm_detail.csv`
+*   **Tuning**: If Tenable plugin output formats or plugin IDs change, update the corresponding `rex` patterns and plugin-ID macros before relying on staged outputs.
 
 ---
 
 ### Step Reporting
 
 #### Step 1: Visibility
-* **`cisco_catalyst_010_reporting_uscybercom_device_category_step_1`**: Counts devices grouped by their CYBERCOM Category (e.g., IoT, Network Infrastructure).
-* **`cisco_catalyst_011_reporting_operating_system_summary_step_1`**: Counts devices grouped by their Operating System (Matched Policy).
+* **`cisco_catalyst_profiler_summary`**: Provides profiled endpoint visibility (identity, CYBERCOM category, matched policy, reporting source).
 
 #### Step 2: Management
-* **`cisco_catalyst_0200_reporting_total_discovered_endpoints_step_2`**: Calculates the distinct count of all MAC addresses found in Tenable or ISE.
-* **`cisco_catalyst_0201_reporting_total_manageable_endpoints_step_2`**: Counts endpoints identified as "Workstations" (manageable devices).
-* **`cisco_catalyst_0202_reporting_total_managed_endpoints_step_2`**: Counts endpoints that have successfully sent a posture report (Code 87000).
-* **`cisco_catalyst_0203_reporting_total_non_managed_endpoints_step_2`**: Counts endpoints that are NOT workstations (non-manageable).
-* **`cisco_catalyst_0204_reporting_total_8021X_endpoints_step_2`**: Counts endpoints using 802.1X authentication.
-* **`cisco_catalyst_0205_reporting_total_mab_endpoints_step_2`**: Counts endpoints using MAB (MAC Authentication Bypass).
-* **`cisco_catalyst_0208_reporting_total_authenticated_other_step_2`**: Counts endpoints using other authentication methods (Code 5236).
-* **`cisco_catalyst_0209_reporting_non_svr_wkstn_managed_devices_step_2`**: Counts managed IoT/Infrastructure devices.
-* **`cisco_catalyst_0210_reporting_non_svr_wkstn_non_managed_devices_step_2`**: Counts non-managed mobile devices.
-* **`cisco_catalyst_0211_13_reporting_svr_wkstn_managed_and_non_managed_devices_step_2`**: Calculates the gap between total workstations and those actually managed.
-* **`cisco_catalyst_0206_7_14_24_reporting_step_2`**: A multi-metric search calculating counts for Profiled/Unprofiled devices, specific security check passes (Malware, Patch, etc.), and Serial Number collection.
-* **`cisco_catalyst_report_all_step_2`**: Aggregates all Step 2 metrics into a single transposed table for a dashboard view.
+* **`cisco_catalyst_ise_manageability`**: Derives managed/managable/unmanagable endpoint status.
+* **`cisco_catalyst_ise_access_levels`**: Computes full/limited/unknown access-level counts per endpoint.
 
 #### Step 3: Remediation
-* **`cisco_catalyst_step_3_remediation_attempt_records`**: Tracks remediation events (Code 62004). It shows which policy/requirement was attempted and whether the remediation was successful or failed.
+* **`cisco_catalyst_ise_posture_remediation`**: Summarizes remediation attempts and outcomes from posture remediation events.
 
 #### Step 4: Access Control
-* **`cisco_catalyst_step_4_connections`**: Charts connection types (Wired, Wireless, VPN) over the last 30 days.
-* **`cisco_catalyst_step_4_access_levels`**: Categorizes devices based on the ISE Authorization Policy matched (Full Access, Remediation, or Unknown).
-* **`cisco_catalyst_step_4_icam_attributes`**: Extracts ICAM data, specifically identifying User vs. Device certificates and their respective Issuers (CAs).
-* **`cisco_catalyst_step_4_authentication_details`**: Detailed breakdown of EAP types, 802.1X status, and the specific ISE server that handled the last authentication.
-* **`cisco_catalyst_step_4_report_all`**: Joins all Step 4 sub-searches into a single master report for access control auditing.
+* **`cisco_catalyst_ise_passed_authn`**: Builds last-auth access assignment, auth source/type, and ICAM details.
+* **`cisco_catalyst_ise_accounting`**: Adds endpoint IP and connection-type telemetry used in access control context.
 
 ---
 
 ### Master Endpoint Record Aggregator & Implementation Scoring
 
 #### Master Aggregator Report
-*   **`cisco_catalyst_reports_lookup`**
-    *   **Description**: The most critical search. It joins **20+ other searches** together using `macAddress`. It uses `coalesce` to prioritize the best available data from ISE or Tenable and saves the final result to `cisco_catalyst_analytics_reports.csv`.
-    *   **Key Commands**: 
-        * `join type=left macAddress` (performed 20+ times)
-        * `coalesce` (prioritizes best data source), `outputlookup`.
-    *   **Tuning**: This search is resource-intensive. Ensure it is scheduled to run when system load is low.
+*   **`cisco_catalyst_kv_update`**
+    *   **Description**: The primary aggregation search for v3.2. It appends all staged ISE/Tenable/resolution datasets, keeps latest values per `macAddress`, and writes to KV Store.
+    *   **Schedule**: Every 10 minutes at minute offsets `3,13,23,33,43,53`.
+    *   **Key Commands**:
+        * `append` (combines staged lookup datasets)
+        * `stats latest(*) by macAddress` (builds master endpoint record)
+        * `outputlookup ... cisco_catalyst_assets_lookup` (persists endpoint master record)
+    *   **Tuning**: This is a high-impact search. Keep staging searches healthy and monitor runtime when reducing interval below 10 minutes.
+*   **`cisco_catalyst_assets_reaper`**
+    *   **Description**: Purges aged endpoints from KV Store based on the `cisco_catalyst_kv_age_out` macro.
+    *   **Key Commands**:
+        * `relative_time` (applies age-out threshold)
+        * `outputlookup key_field=_key` (rewrites pruned KV contents)
 
-#### Implementation Metrics
-*   **`cisco_catatlyst_implementation_step[1-5]_metric[1-2]`**
-    *   **Description**: Calculates percentage-based scores for each implementation phase.
-        *  **(6 searches total)**
-            * **`cisco_catatlyst_implementation_step1_metric1`**: Measures the growth/change in discovered devices month-over-month.
-            * **`cisco_catatlyst_implementation_step1_metric2`**: Measures the percentage of devices successfully profiled into CYBERCOM categories.
-            * **`cisco_catatlyst_implementation_step2_metric1`**: Measures the ratio of Managed vs. Manageable endpoints.
-            * **`cisco_catatlyst_implementation_step3_metric1`**: Measures the percentage of non-compliant devices that are actively attempting remediation.
-            * **`cisco_catatlyst_implementation_step4_metric1`**: Measures the percentage of permitted devices that have an assigned access level.
-            * **`cisco_catatlyst_implementation_step5_metric1`**: Measures the percentage of non-compliant devices that are successfully restricted.
-    *   **Key Commands**: 
-        * `relative_time` (compares months)
-        * `eval score = case(...)` (assigns points based on percentage thresholds).
-    *   **Tuning**: Adjust the `case` statement thresholds if your organization has different KPI targets.
-*   **`cisco_catalyst_implementation_overall_score`**
-    *   **Description**: Unions the scores from all 5 steps to provide a single percentage-based health score.
-    *   **Key Commands**: 
-        * `union` (combines results from all 5 step searches)
-        * `stats sum(score)`
+#### Master Endpoint Record Report and Output for CMRS reporting add-on
+*   **`cisco_catalyst_kv_view`**
+    *   **Description**: Produces a scored endpoint completeness view from KV Store, then exports to CSV for reporting workflows (including CMRS option).
+    *   **Key Commands**:
+        * `eval score_*` (computes domain-level data quality components)
+        * `eval data_quality_pct/data_quality_tier` (builds completeness score and tier)
+        * `table/fillnull` (publishes analyst-ready report fields)
+*   **`cisco_catalyst_ip_dns_resolve`**
+    *   **Description**: Enriches missing IP or DNS values and stages resolution output used by `cisco_catalyst_kv_update`.
+    *   **Key Commands**:
+        * `lookup dnslookup` (forward/reverse DNS correlation)
+        * `coalesce` (selects best resolved IP/DNS values)
+        * `outputlookup stage_resolvedIpDns_detail.csv`
 
 ---
 
