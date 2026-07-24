@@ -81,7 +81,7 @@ By integrating monitoring and reporting, organizations can ensure that trust is 
     - [Step 3 - Compliance Remediation](#step-3---compliance-remediation)
     - [Step 4 - ICAM Summary](#step-4---icam-summary)
     - [Implementation Metrics](#implementation-metrics)
-- [Required for endpoints over 10,000 Endpoints](#required-for-endpoints-over-10000-endpoints)
+- [Required for deployments over 10,000 Endpoints](#required-for-deployments-over-10000-endpoints)
     - [Modify cisco\_catalyst\_kv\_view Using "sort 0"](#modify-cisco_catalyst_kv_view-using-sort-0)
 - [Change Navigation to only show Comply to Connect (C2C) Views - Optional](#change-navigation-to-only-show-comply-to-connect-c2c-views---optional)
     - [Create the local UI Navigation folder structure.](#create-the-local-ui-navigation-folder-structure)
@@ -101,7 +101,7 @@ By integrating monitoring and reporting, organizations can ensure that trust is 
     - [Master Endpoint Record Aggregator \& Implementation Scoring](#master-endpoint-record-aggregator--implementation-scoring)
       - [Master Aggregator Report](#master-aggregator-report)
       - [Master Endpoint Record Report and Output for CMRS reporting add-on](#master-endpoint-record-report-and-output-for-cmrs-reporting-add-on)
-  - [SyslogNG Configuration for ISE Syslog over 8192 bytes](#syslogng-configuration-for-ise-syslog-over-8192-bytes)
+  - [SyslogNG Configuration for ISE Syslog over 8192 bytes (only needed if Syslog truncation is present)](#syslogng-configuration-for-ise-syslog-over-8192-bytes-only-needed-if-syslog-truncation-is-present)
     - [Check \& Set SELINUX Permissions. Use TCP or UDP example based on desired output from ISE.](#check--set-selinux-permissions-use-tcp-or-udp-example-based-on-desired-output-from-ise)
     - [Create Directory for ISE Logs in /var/log](#create-directory-for-ise-logs-in-varlog)
     - [Restart SyslogNG for configuration to be loaded](#restart-syslogng-for-configuration-to-be-loaded)
@@ -630,7 +630,7 @@ This view provides KPI metrics based on the C2C program office Goals and Calcula
 
 ---
 
-# Required for endpoints over 10,000 Endpoints
+# Required for deployments over 10,000 Endpoints
 In the event that the evironment for Analytics reporting exceeds 10,000 endpoints this will encounter a default limit on Splunk which limits Search results to 10,000 records.  
 
 ### Modify cisco_catalyst_kv_view Using "sort 0"
@@ -882,7 +882,9 @@ These searches use `tstats` against Tenable datamodel events and normalize outpu
 
 ---
 
-## SyslogNG Configuration for ISE Syslog over 8192 bytes
+## SyslogNG Configuration for ISE Syslog over 8192 bytes (only needed if Syslog truncation is present)
+
+Use this section only if Cisco ISE syslog events are being truncated before Splunk ingestion (for example, posture or other large messages arriving incomplete). This SyslogNG configuration reassembles split/truncated message segments and writes a reconstructed event to disk so the full payload is available for Splunk parsing and reporting.
 
 ### Check & Set SELINUX Permissions. Use TCP or UDP example based on desired output from ISE.
 ```
