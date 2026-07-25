@@ -17,6 +17,11 @@ Primary references:
 - CMRS guide: [CMRS Reporting Supplement/submit2cmrsAppInstallationGuide.md](CMRS%20Reporting%20Supplement/submit2cmrsAppInstallationGuide.md)
 - (Optional) Tenable audit guide: [Tenable C2C HW Auditing/TenableAuditFileInstallationGuide.md](Tenable%20C2C%20HW%20Auditing/TenableAuditFileInstallationGuide.md)
 
+## Support & Contact
+For DoW documentation please reference https://patches.csd.disa.mil/Metadata.aspx?id=139944  
+
+If you have Cisco/Splunk configuration or licensing questions please reach out to the support mailer @ cisco_c2c_support@external.cisco.com
+
 ## Documentation Navigation Map
 
 ### Core C2C Splunk Reporting Guides
