@@ -57,7 +57,7 @@ Automate the submission of endpoint compliance data to the DISA Continuous Monit
 
 ## Installation
 
-Application Package: [submit2cmrs-1.0.6.tar.gz](https://github.com/PubSec-Security-DevNet/ciscoSplunkC2CReporting/releases/download/v1.0.6/submit2cmrs-1.0.6.tar.gz)
+Application Package: [submit2cmrs-1.0.6.tar.gz](https://github.com/PubSec-Security-DevNet/ciscoSplunkC2CReporting/releases/download/release/submit2cmrs-1.0.6.tar.gz)
 
 ### Prerequisites
 
