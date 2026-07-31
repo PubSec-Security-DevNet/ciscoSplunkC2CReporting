@@ -1,0 +1,46 @@
+name: Create Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (e.g. v1.0.6)'
+        required: true
+        default: 'v1.0.6'
+      release_name:
+        description: 'Release title'
+        required: true
+        default: 'submit2cmrs v1.0.6'
+      prerelease:
+        description: 'Mark as pre-release'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create GitHub Release and upload asset
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ github.event.inputs.tag }}" \
+            --title "${{ github.event.inputs.release_name }}" \
+            --notes "## submit2cmrs Splunk App
+
+          Splunk app for submitting Cisco C2C endpoint data to DISA CMRS via SOAP.
+
+          ### Installation
+          See the [Installation Guide](https://github.com/${{ github.repository }}/blob/main/CMRS%20Reporting%20Supplement/submit2cmrsAppInstallationGuide.md) for setup instructions." \
+            --prerelease=${{ github.event.inputs.prerelease }} \
+            "CMRS Reporting Supplement/static/file/submit2cmrs-1.0.6.tar.gz"
