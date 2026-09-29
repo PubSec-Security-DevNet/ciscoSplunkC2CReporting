@@ -57,7 +57,7 @@ Automate the submission of endpoint compliance data to the DISA Continuous Monit
 
 ## Installation
 
-Application Package: [submit2cmrs-1.0.6.tar.gz](https://github.com/PubSec-Security-DevNet/ciscoSplunkC2CReporting/releases/download/release/submit2cmrs-1.0.6.tar.gz)
+Application Package: [submit2cmrs-1.0.7.tar.gz](https://github.com/PubSec-Security-DevNet/ciscoSplunkC2CReporting/releases/download/v1.0.7/submit2cmrs-1.0.7.tar.gz)
 
 ### Prerequisites
 
@@ -497,6 +497,7 @@ Likely issue with the Trust Bundle. Please ensure all public keys from server to
 | 1.0.4 | June 2026 | Updated COAMS Normalization routine and README |
 | 1.0.5 | June 2026 | Access Level Normalization fix for Cisco Catalyst App v3.1 |
 | 1.0.6 | July 2026 | Added SHC captain-only modular input execution, proxy support (including authenticated proxy credentials), and bundled deployer bootstrap tooling/templates. |
+| 1.0.7 | September 2026 | Fixed Jinja template syntax errors causing manual CMRS submission failures; fixed Python handling issues with Splunk on Windows. |
 
 ---
 
