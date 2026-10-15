@@ -10,7 +10,7 @@ Use this baseline unless your program requires a different approved stack.
 |---|---|
 | Cisco Enterprise Networking for Splunk Platform App | 3.2.10+ | 
 | Cisco Catalyst Add-on for Splunk (TA) | 3.2.41+ |
-| CMRS reporting supplement tooling | 1.0.6 | 
+| CMRS reporting supplement tooling | [1.0.7](https://github.com/PubSec-Security-DevNet/ciscoSplunkC2CReporting/releases/tag/v1.0.7) | 
 
 Primary references:
 - App guide (v3.2): [C2C Reporting with Splunk/C2CReportingInstallationGuide-v3.2.md](C2C%20Reporting%20with%20Splunk/C2CReportingInstallationGuide-v3.2.md)
