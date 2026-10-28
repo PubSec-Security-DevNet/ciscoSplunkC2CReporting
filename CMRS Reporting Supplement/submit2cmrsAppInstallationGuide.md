@@ -396,15 +396,16 @@ If no remediation type keyword matches, the application uses `OtherType`.
 
 #### Policy Naming Example and Matching Notes
 
-A policy named **`Firewall - Host Firewall - Install`** supplies all three mappings:
+Use the following naming convention for an initial compliance rule and its remediation action:
 
-| Text in policy name | CMRS mapping |
-|---------------------|--------------|
-| `Firewall` | Category: `FW` |
-| `Host Firewall` | Product: `HstFw` |
-| `Install` | Remediation type: `InsAgt` |
+| Purpose | Policy name | Intended mapping |
+|---------|-------------|------------------|
+| Initial compliance rule | `C2C-FW-HstFw` | Firewall (`FW`), host firewall (`HstFw`) |
+| Remediation action | `C2C-FW-HstFw-StSvc` | Firewall (`FW`), host firewall (`HstFw`), start service (`StSvc`) |
 
-Assuming the requirement name and status introduce no earlier matches, a successful remediation is reported as `remediation C2C FW_HstFw_InsAgt_Succeeded`.
+**Keyword requirement:** These names express the intended mappings, but the application does not recognize every identifier as an input keyword. `FW` matches the firewall category; `HstFw` alone does not match the host firewall product, and `StSvc` alone does not match the remediation type. Include `host firewall` and `service` in the associated requirement name or other matching text. For example, a requirement named `Host Firewall Service` supplies both keywords while allowing the policy names above to remain unchanged.
+
+For the remediation action, assuming the requirement name and status introduce no earlier matches, a successful remediation is reported as `remediation C2C FW_HstFw_StSvc_Succeeded`.
 
 **Watch for overlapping keywords in the application:**
 
