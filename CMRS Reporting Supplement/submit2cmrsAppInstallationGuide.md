@@ -25,6 +25,13 @@ Automate the submission of endpoint compliance data to the DISA Continuous Monit
         - [Logging \& Debug](#logging--debug)
         - [Performance](#performance)
         - [Compliance Rule Mapping](#compliance-rule-mapping)
+  - [Mapping Information](#mapping-information)
+    - [Cybercom Category Mapping (STEP 1 Information)](#cybercom-category-mapping-step-1-information)
+    - [Remediation Mapping (STEP 3 Information)](#remediation-mapping-step-3-information)
+      - [Category Mapping](#category-mapping)
+      - [Product Mapping](#product-mapping)
+      - [Remediation Type Mapping](#remediation-type-mapping)
+      - [Policy Naming Example and Matching Notes](#policy-naming-example-and-matching-notes)
   - [Creating and Managing Inputs](#creating-and-managing-inputs)
     - [Create a New Input](#create-a-new-input)
     - [Input Validation](#input-validation)
@@ -303,6 +310,112 @@ These fields map your CSV column names to C2C compliance rules. **Only modify if
 | **Operational Accreditation Rule Names** | Text | `ruleResultOpAccreditation,C2COperationalaccreditationResult` |
 
 **Comma Delimiter Note:** The system will match any column name in the comma-separated list. For example, `ruleResultFirewall,C2CFirewallResult` accepts both `ruleResultFirewall` and `C2CFirewallResult` as valid column names. This allows flexibility when integrating CSVs with varying column naming conventions.
+
+---
+
+## Mapping Information
+
+### Cybercom Category Mapping (STEP 1 Information)
+
+The application standardizes the device record's `cybercomCategory` value for CMRS reporting.
+
+The input is normalized to lowercase before matching.
+
+| Normalized value contains | Standard category reported to CMRS |
+|---------------------------|------------------------------------|
+| `cyber physical systems` | Cyber Physical Systems/Control Systems (CPS/CS) |
+| `networked user support` | Networked User Support Devices |
+| `infrastructure` | Network Infrastructure |
+| `workstations and servers` | Workstations and Servers |
+| `internet of things` | Internet of Things (IoT) |
+| `mobile devices` | Mobile Devices |
+
+### Remediation Mapping (STEP 3 Information)
+
+For CMRS remediation reporting, **the ISE Posture Policy Name must contain a recognized keyword or phrase for each intended category, product, and remediation type**. Use the tables below when naming policies. Only **one** keyword or phrase from a row is needed; you do not need to include every keyword in that row.
+
+The add-on checks the combined `requirementName`, `policyName`, and remediation `status` from `remediationSummary`. Including the intended keywords in the **ISE Posture Policy Name** makes the mapping explicit, but keywords in the requirement name or status can also affect the result.
+
+**How remediation matching works:** Matching ignores capitalization and looks for keywords anywhere in the text, including inside longer words. Each table is evaluated independently, from top to bottom, and **the first matching row wins**. The tables below preserve the application's matching order. The CMRS identifiers are the output values; use the listed keywords in your policy names.
+
+#### Category Mapping
+
+| CMRS identifier | Category | Policy name must contain at least one of these |
+|-----------------|----------|-----------------------------------------------|
+| `FW` | Firewall | `firewall`, `fw_`, `fw` |
+| `PA` | Patching / updates | `patch`, `update`, `wsus`, `sccm`, `mecm`, `patching` |
+| `AM` | Anti-malware | `malware`, `antivirus`, `defender`, `av`, `virus`, `am`, `endpoint protection` |
+| `VUL` | Vulnerability | `vuln`, `vulnerability`, `cve`, `nessus`, `tenable`, `acas` |
+| `DE` | Disk encryption | `encrypt`, `encryption`, `bitlocker`, `filevault`, `luks` |
+| `EM` | Endpoint monitoring | `monitor`, `monitoring`, `edr`, `xdr`, `acem`, `tanium`, `mde` |
+
+If no category keyword matches, the application uses `OTH`.
+
+#### Product Mapping
+
+| CMRS identifier | Product | Policy name must contain at least one of these |
+|-----------------|---------|-----------------------------------------------|
+| `MC` | McAfee / Trellix | `mcafee`, `trellix` |
+| `MDE` | Microsoft Defender | `microsoft defender`, `windows defender`, ` mde ` (with a space on each side) |
+| `ACAS` | ACAS / Nessus / Tenable | `acas`, `nessus`, `tenable` |
+| `ACEM` | Tanium / ACEM | `tanium`, `acem` |
+| `HstFw` | Host firewall / HIPS | `host firewall`, `hips` |
+| `SysAV` | System antivirus | `system antivirus` |
+| `MECM` | Microsoft Endpoint Configuration Manager | `mecm`, `endpoint configuration manager` |
+| `BitLkr` | BitLocker | `bitlocker`, `encrypt` |
+| `ChkPt` | Check Point | `checkpoint` |
+| `Sym` | Symantec | `symantec` |
+| `LUKS` | LUKS | `luks`, `encrypt` |
+| `FVault` | FileVault | `filevault` |
+| `COAMS` | COAMS | `coams` |
+| `VMFus` | VMware Fusion | `vmware fusion` |
+| `Jamf` | Jamf / Casper | `jamf`, `casper` |
+| `SCCM` | System Center Configuration Manager | `sccm`, `system center configuration manager` |
+
+If no product keyword matches, the application uses `Oth`.
+
+#### Remediation Type Mapping
+
+| CMRS identifier | Remediation action | Policy name must contain at least one of these |
+|-----------------|--------------------|-----------------------------------------------|
+| `StAgt` | Start agent | `start` |
+| `InsAgt` | Install agent | `install` |
+| `ChkAV` | Agent check-in | `check-in`, `check in`, `checkin` |
+| `StSvc` | Start service | `service` |
+| `TicGen` | Generate ticket | `ticket` |
+| `RstSvc` | Restart service | `restart` |
+| `SysUpd` | System update | `start system update`, `system update`, `update status` |
+| `SysRb` | System reboot | `force system reboot`, `reboot` |
+| `StpApp` | Stop application | `kill the application`, `stop application` |
+| `Rest` | Restrict access | `restrict` |
+| `DisExt` | Disable external device | `disable external device`, `disable usb` |
+| `UpdAgt` | Update agent | `update` |
+| `UpdAVSig` | Update antivirus signatures | `update av signatures`, `av signature` |
+
+If no remediation type keyword matches, the application uses `OtherType`.
+
+#### Policy Naming Example and Matching Notes
+
+A policy named **`Firewall - Host Firewall - Install`** supplies all three mappings:
+
+| Text in policy name | CMRS mapping |
+|---------------------|--------------|
+| `Firewall` | Category: `FW` |
+| `Host Firewall` | Product: `HstFw` |
+| `Install` | Remediation type: `InsAgt` |
+
+Assuming the requirement name and status introduce no earlier matches, a successful remediation is reported as `remediation C2C FW_HstFw_InsAgt_Succeeded`.
+
+**Watch for overlapping keywords in the application:**
+
+- `update` selects category `PA` before anti-malware or encryption categories, even if the name also includes `defender` or `bitlocker`.
+- `encrypt` selects product `BitLkr` before `LUKS` or `FVault`. For LUKS or FileVault, use `luks` or `filevault` without `encrypt` elsewhere in the matching text.
+- `restart` contains `start`, so it selects `StAgt` before `RstSvc`. Likewise, `start system update` selects `StAgt` before `SysUpd`.
+- `update av signatures` selects `UpdAgt` before `UpdAVSig`. The phrase `av signature` without `update` can select `UpdAVSig` if no earlier remediation row matches.
+- Short keywords such as `am` and `av` can match inside product names or other words. For example, `Jamf` contains `am` and therefore selects category `AM` before later category rows.
+
+Review the full requirement name, policy name, and status together when a report produces an unexpected identifier.
+
 
 ---
 
