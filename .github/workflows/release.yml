@@ -4,13 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Release tag (e.g. v1.0.7)'
+        description: 'Release tag (e.g. v1.0.8)'
         required: true
-        default: 'v1.0.7'
+        default: 'v1.0.8'
       release_name:
         description: 'Release title'
         required: true
-        default: 'submit2cmrs v1.0.7'
+        default: 'submit2cmrs v1.0.8'
       prerelease:
         description: 'Mark as pre-release'
         required: false
@@ -43,4 +43,4 @@ jobs:
           ### Installation
           See the [Installation Guide](https://github.com/${{ github.repository }}/blob/main/CMRS%20Reporting%20Supplement/submit2cmrsAppInstallationGuide.md) for setup instructions." \
             --prerelease=${{ github.event.inputs.prerelease }} \
-            "CMRS Reporting Supplement/static/file/submit2cmrs-1.0.7.tar.gz"
+            "CMRS Reporting Supplement/static/file/submit2cmrs-1.0.8.tar.gz"
